@@ -20,13 +20,24 @@ namespace SeaDrip
                 }
             }
 
+            bool TryGetLine( std::string& out )
+            {
+                if( this->eof() )
+                {
+                    return false;
+                }
+                char line[ 128 ];
+                this->getline( line, 128 );
+                out = line;
+                return true;
+            }
+
             bool Next( std::string key, std::string val )
             {
                 boost::regex pattern( "([^=]+)=\\s*([^\\s]+)" );
-                while( !this->eof() )
+                std::string line;
+                while( this->TryGetLine( line ) )
                 {
-                    char line[ 128 ];
-                    this->getline( line, 128 );
                     std::string sline = boost::trim_copy( std::string( line ) );
                     if( sline.empty() || ( sline.c_str()[ 0 ] == this->m_c_note_flag ) )
                     {
