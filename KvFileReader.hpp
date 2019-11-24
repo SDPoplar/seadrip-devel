@@ -2,62 +2,47 @@
 #define __SD_KVFILE_READER_H__
 
 #include <string>
-#include <fstream>
+#include "IniFileReader.hpp"
 #include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
 
 namespace SeaDrip
 {
-    class KvFileReader : public std::ifstream
+    class KvFileReader : public IniFileReader
     {
         public:
-            KvFileReader( std::string file_path, char note_flag ) : std::ifstream( file_path, std::ios::in ), m_c_note_flag( note_flag  ) {}
-            ~KvFileReader()
-            {
-                if( this->is_open() )
-                {
-                    this->close();
-                }
-            }
-
-            bool TryGetLine( std::string& out )
-            {
-                if( this->eof() )
-                {
-                    return false;
-                }
-                char line[ 128 ];
-                this->getline( line, 128 );
-                out = line;
-                return true;
-            }
+            KvFileReader( std::string file_path, char note_flag ) : IniFileReader( file_path, note_flag ),
+                m_regex_pattern( "([^=]+)=\\s*([^\\s]+)" ), m_s_last_key( "" ), m_s_last_val( "" ) {}
 
             bool Next( std::string key, std::string val )
             {
-                boost::regex pattern( "([^=]+)=\\s*([^\\s]+)" );
-                std::string line;
-                while( this->TryGetLine( line ) )
+                if( this->NextLine() )
                 {
-                    std::string sline = boost::trim_copy( std::string( line ) );
-                    if( sline.empty() || ( sline.c_str()[ 0 ] == this->m_c_note_flag ) )
-                    {
-                        continue;
-                    }
-                    boost::smatch matches;
-                    if( !boost::regex_search( sline, matches, pattern ) || ( matches.size() < 3 ) )
-                    {
-                        continue;
-                    }
-                    std::string _key = matches[ 1 ];
-                    key = boost::trim_copy( _key );
-                    std::string _val = matches[ 2 ];
-                    val = boost::trim_copy( _val );
+                    key = this->m_s_last_key;
+                    val = this->m_s_last_val;
                     return true;
                 }
                 return false;
             }
         protected:
-            char m_c_note_flag;
+            bool ParseKeyVal( std::string line )
+            {
+                boost::smatch matches;
+                if( !boost::regex_search( line, matches, this->m_regex_pattern ) || (matches.size() < 3) )
+                {
+                    return false;
+                }
+                std::string _key = matches[ 1 ];
+                this->m_s_last_key = boost::trim_copy( _key );
+                std::string _val = matches[ 2 ];
+                this->m_s_last_val = boost::trim_copy( _val );
+                return true;
+            }
+
+            const boost::regex m_regex_pattern;
+
+            std::string m_s_last_key;
+            std::string m_s_last_val;
     };
 };
 
