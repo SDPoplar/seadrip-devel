@@ -48,8 +48,10 @@ namespace SeaDrip
                     {
                         continue;
                     }
-                    key = boost::trim_copy( matches[ 1 ] );
-                    val = boost::trim_copy( matches[ 2 ] );
+                    std::string _key = matches[ 1 ];
+                    key = boost::trim_copy( _key );
+                    std::string _val = matches[ 2 ];
+                    val = boost::trim_copy( _val );
                     return true;
                 }
                 return false;

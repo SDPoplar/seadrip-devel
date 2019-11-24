@@ -51,7 +51,7 @@ namespace SeaDrip
             void Init( int argc, char** argv )
             {
                 char ch;
-                while( ( ch = getopt( argc, argv, this->GetShellOptions() ) ) != -1 )
+                while( ( ch = getopt( argc, argv, this->m_s_shell_options.c_str() ) ) != -1 )
                 {
                     if( ch == 'c' )
                     {
@@ -84,10 +84,10 @@ namespace SeaDrip
                 }
             }
         protected:
-            virtual char* GetShellOptions( void ) const noexcept = 0;
             virtual void ShellOverride( char shell_flag, std::string val ) = 0;
 
             TConfigProperty<std::string> m_s_config_file;
+            std::string m_s_shell_options;
             std::map<char, TConfigProperty<bool>*> m_map_bool_props;
             std::map<std::string, void(*)( const std::string& )> m_map_cfgfile_override;
     };
