@@ -4,7 +4,9 @@
 #include <string>
 #include <map>
 #include <fstream>
+#if defined( linux ) or defined( _GNUC_ )
 #include <unistd.h>
+#endif
 #include <seadrip/KvFileReader.hpp>
 
 namespace SeaDrip
@@ -50,6 +52,7 @@ namespace SeaDrip
             BaseConfig( std::string def_cfg_path ) : m_s_config_file( def_cfg_path ) {}
             void Init( int argc, char** argv )
             {
+#if defined( linux ) or defined( _GNUC_ )
                 char ch;
                 while( ( ch = getopt( argc, argv, this->m_s_shell_options.c_str() ) ) != -1 )
                 {
@@ -82,6 +85,7 @@ namespace SeaDrip
                         method->second( val );
                     }                
                 }
+#endif
             }
         protected:
             virtual void ShellOverride( char shell_flag, std::string val ) = 0;
