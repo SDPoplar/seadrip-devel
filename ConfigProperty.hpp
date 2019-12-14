@@ -4,7 +4,8 @@
 #include <string>
 #include <map>
 #include <fstream>
-#if defined( linux ) or defined( _GNUC_ )
+#include <functional>
+#if defined( linux ) or defined( __GNUC__ )
 #include <unistd.h>
 #endif
 #include <seadrip/KvFileReader.hpp>
@@ -52,7 +53,7 @@ namespace SeaDrip
             BaseConfig( std::string def_cfg_path ) : m_s_config_file( def_cfg_path ) {}
             void Init( int argc, char** argv )
             {
-#if defined( linux ) or defined( _GNUC_ )
+#if defined( linux ) or defined( __GNUC__ )
                 char ch;
                 while( ( ch = getopt( argc, argv, this->m_s_shell_options.c_str() ) ) != -1 )
                 {
@@ -94,6 +95,20 @@ namespace SeaDrip
             std::string m_s_shell_options;
             std::map<char, TConfigProperty<bool>*> m_map_bool_props;
             std::map<std::string, void(*)( const std::string& )> m_map_cfgfile_override;
+    };
+
+    class DaemonConfig : public BaseConfig
+    {
+    public:
+        DaemonConfig( std::string def_cfg_path ) : BaseConfig( def_cfg_path ), m_s_pid_path( "" )
+        {
+            //  this->m_map_cfgfile_override[ "pid" ] = &this->CfgOverridePidPath;
+        }
+        std::string GetPidPath( void ) const noexcept { return this->m_s_pid_path.Get(); }
+
+    protected:
+        void CfgOverridePidPath( const std::string& path ) { this->m_s_pid_path.Set( EConfigSetFrom::CFGFILE, path ); }
+        TConfigProperty<std::string> m_s_pid_path;
     };
 };
 
