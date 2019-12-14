@@ -20,14 +20,15 @@ namespace SeaDrip
         SingletonCore& operator = ( const SingletonCore& obj ) = default;
 
     private:
-        static typename T* g_p_core;
+        static T* g_p_core;
     };
 
     template<typename T>
     T* SingletonCore<T>::g_p_core = nullptr;
-
-#if defined( linux ) or defined( _GNUC_ )
+    
+#if defined( linux ) or defined( __GNUC__ )
     template<typename Conf, typename std::enable_if<std::is_base_of<SeaDrip::BaseConfig, Conf>{}, int>::type = 0>
+    //  template<typename Conf>
 #else
     template<typename Conf, typename std::enable_if < std::is_base_of<SeaDrip::BaseConfig, Conf>::value, int > ::type = 0 >
 #endif
