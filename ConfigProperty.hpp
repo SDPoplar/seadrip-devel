@@ -80,34 +80,38 @@ namespace SeaDrip
                 std::string key, val;
                 while( cfg.Next( key, val ) )
                 {
-                    auto method = this->m_map_cfgfile_override.find( key );
-                    if( method != this->m_map_cfgfile_override.end() )
+                    if( !this->CfgFileOverride( key, val ) )
                     {
-                        method->second( val );
-                    }                
+                        std::cout << "Unknown config item: " << key << std::endl;
+                    }
                 }
 #endif
             }
         protected:
             virtual void ShellOverride( char shell_flag, std::string val ) = 0;
+            virtual bool CfgFileOverride( std::string key, std::string val ) { return false; };
 
             TConfigProperty<std::string> m_s_config_file;
             std::string m_s_shell_options;
             std::map<char, TConfigProperty<bool>*> m_map_bool_props;
-            std::map<std::string, void(*)( const std::string& )> m_map_cfgfile_override;
     };
 
     class DaemonConfig : public BaseConfig
     {
     public:
-        DaemonConfig( std::string def_cfg_path ) : BaseConfig( def_cfg_path ), m_s_pid_path( "" )
-        {
-            //  this->m_map_cfgfile_override[ "pid" ] = &this->CfgOverridePidPath;
-        }
+        DaemonConfig( std::string def_cfg_path ) : BaseConfig( def_cfg_path ), m_s_pid_path( "" ) {}
         std::string GetPidPath( void ) const noexcept { return this->m_s_pid_path.Get(); }
 
     protected:
-        void CfgOverridePidPath( const std::string& path ) { this->m_s_pid_path.Set( EConfigSetFrom::CFGFILE, path ); }
+        virtual bool CfgFileOverride( std::string key, std::string val ) override
+        {
+            if( key == "pid" )
+            {
+                this->m_s_pid_path.Set( EConfigSetFrom::CFGFILE, val );
+                return true;
+            }
+            return false;
+        }
         TConfigProperty<std::string> m_s_pid_path;
     };
 };

@@ -1,10 +1,12 @@
 #ifndef __SD_GLOBAL_CORE_HPP__
 #define __SD_GLOBAL_CORE_HPP__
 
+#if defined( linux ) or defined( __GNUC__ )
+#include <signal.h>
+#endif
+#include <fstream>
 #include <type_traits>
 #include "ConfigProperty.hpp"
-
-#include <fstream>
 
 namespace SeaDrip
 {
@@ -14,6 +16,11 @@ namespace SeaDrip
         static T* Get()
         {
             return SingletonCore<T>::g_p_core ? SingletonCore<T>::g_p_core : new T();
+        }
+
+        bool IsRunning() const noexcept
+        {
+            return this->m_b_run_switch;
         }
 
         int Run()
@@ -85,6 +92,13 @@ namespace SeaDrip
                 pid << getpid();
                 pid.close();
             }
+            signal( SIGUSR2, []( int sig )->void {
+                auto core = DaemonCore::Get();
+                if( core->IsRunning() )
+                {
+                    core->Quit();
+                }
+            } );
             return true;
         }
 

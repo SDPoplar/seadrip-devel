@@ -14,7 +14,7 @@ namespace SeaDrip
             KvFileReader( std::string file_path, char note_flag ) : IniFileReader( file_path, note_flag ),
                 m_regex_pattern( "([^=]+)=\\s*([^\\s]+)" ), m_s_last_key( "" ), m_s_last_val( "" ) {}
 
-            bool Next( std::string key, std::string val )
+            bool Next( std::string& key, std::string& val )
             {
                 if( this->NextLine() )
                 {
@@ -25,7 +25,7 @@ namespace SeaDrip
                 return false;
             }
         protected:
-            bool ParseKeyVal( std::string line )
+            bool ParseLine( std::string line ) override
             {
                 boost::smatch matches;
                 if( !boost::regex_search( line, matches, this->m_regex_pattern ) || (matches.size() < 3) )
