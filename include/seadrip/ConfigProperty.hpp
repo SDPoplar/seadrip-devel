@@ -106,9 +106,11 @@ namespace SeaDrip
     class DaemonConfig : public BaseConfig
     {
     public:
-        DaemonConfig( std::string def_cfg_path ) : BaseConfig( def_cfg_path ), m_s_pid_path( "" ), m_n_exit_sig( SIGUSR2 ) {}
+        DaemonConfig( std::string def_cfg_path ) : BaseConfig( def_cfg_path ),
+            m_s_pid_path( "" ), m_n_exit_sig( SIGUSR2 ), m_s_log_path( "" ) {}
         std::string GetPidPath( void ) const noexcept { return this->m_s_pid_path.Get(); }
         int GetExitSig( void ) const noexcept { return this->m_n_exit_sig.Get(); }
+        std::string GetLogPath( void ) const noexcept { return this->m_s_log_path.Get(); }
 
     protected:
         virtual bool CfgFileOverride( std::string key, std::string val ) override
@@ -132,6 +134,7 @@ namespace SeaDrip
     private:
         TConfigProperty<std::string> m_s_pid_path;
         TConfigProperty<int> m_n_exit_sig;
+        TConfigProperty<std::string> m_s_log_path;
     };
 
     #ifndef DEF_LISTEN_PORT
