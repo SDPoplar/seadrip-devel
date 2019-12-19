@@ -3,10 +3,19 @@
 
 #if defined( linux ) or defined( __GNUC__ )
 #include <signal.h>
+#include <sys/socket.h>
 #endif
 #include <fstream>
 #include <type_traits>
+#include <err.h>
 #include "ConfigProperty.hpp"
+
+
+#if defined( linux ) or defined( __GNUC__ )
+    #define LIMIT_TEMPLATE( tpltype, basetype ) template<typename tpltype, typename std::enable_if<std::is_base_of<basetype, tpltype>{}, int>::type = 0>
+#else
+    #define LIMIT_TEMPLATE( tpltype, basetype ) template<typename tpltype, typename std::enable_if <std::is_base_of<basetype, tpltype>::value, int>::type = 0 >
+#endif
 
 namespace SeaDrip
 {
@@ -36,6 +45,7 @@ namespace SeaDrip
         void Quit()
         {
             this->m_b_run_switch = false;
+            this->PreQuit();
         }
 
     protected:
@@ -46,6 +56,7 @@ namespace SeaDrip
         virtual bool ReadyToRun() { return true; }
         virtual void Release() {}
         virtual void Tick() {}
+        virtual void PreQuit() {}
 
     private:
         static T* g_p_core;
@@ -55,11 +66,7 @@ namespace SeaDrip
     template<typename T>
     T* SingletonCore<T>::g_p_core = nullptr;
 
-#if defined( linux ) or defined( __GNUC__ )
-    template<typename Conf, typename std::enable_if<std::is_base_of<SeaDrip::DaemonConfig, Conf>{}, int>::type = 0>
-#else
-    template<typename Conf, typename std::enable_if < std::is_base_of<SeaDrip::BaseConfig, Conf>::value, int > ::type = 0 >
-#endif
+    LIMIT_TEMPLATE( Conf, SeaDrip::BaseConfig )
     class DaemonCore : public SingletonCore<DaemonCore<Conf>>
     {
         friend SingletonCore<DaemonCore>;
@@ -69,7 +76,7 @@ namespace SeaDrip
         #error 'DEF_CFG_PATH' not defined
     #endif
         DaemonCore() : SingletonCore<DaemonCore>(), m_o_conf( DEF_CFG_PATH ), m_b_run_switch( false ), m_b_pid_saved( false ) {}
-        bool SavePid( int pid )
+        bool SavePid( int pid = 0 )
         {
             std::string pidpath = this->m_o_conf.GetPidPath();
             if( pidpath.empty() )
@@ -81,7 +88,10 @@ namespace SeaDrip
             {
                 return false;
             }
-            fpid << pid;
+            if( pid > 0 )
+            {
+                fpid << pid;
+            }
             fpid.close();
             return true;
         }
@@ -96,14 +106,18 @@ namespace SeaDrip
             return &this->m_o_conf;
         }
 
+    protected:
         virtual bool ReadyToRun() override
         {
+            if( !SingletonCore<DaemonCore<Conf>>::ReadyToRun() )
+            {
+                return false;
+            }
             std::string pidpath = this->m_o_conf.GetPidPath();
             int npid = getpid();
             
-            if( !this->SavePid( npid ) || daemon( 1, 1 ) )
+            if( !this->SavePid() || daemon( 1, 1 ) )
             {
-                std::cout << "Create daemon failed" << std::endl;
                 return false;
             }
             
@@ -133,6 +147,55 @@ namespace SeaDrip
                 remove( pidpath.c_str() );
             }
         }
+    };
+
+    LIMIT_TEMPLATE( Conf, SeaDrip::SocketDaemonConfig )
+    class SocketDaemonCore : public DaemonCore<Conf>
+    {
+    protected:
+        virtual bool ReadyToRun() override
+        {
+            if( !DaemonCore<Conf>::ReadyToRun() )
+            {
+                fprintf( stderr, "Daemon init failed\n" );
+                return false;
+            }
+            this->m_n_socket = socket( AF_INET, SOCK_STREAM, 0 );
+            fprintf( stderr, "Tcmd get socket %d\n", this->m_n_socket );
+            if( this->m_n_socket == -1 )
+            {
+                fprintf( stderr, "Socket create failed\n" );
+                return false;
+            }
+            struct sockaddr_in addr;
+            addr.sin_family = AF_INET;
+            addr.sin_addr.s_addr = htonl( this->m_o_conf.GetSockAddr() );
+            addr.sin_port = htons( this->m_o_conf.GetListenPort() );
+            if( bind( this->m_n_socket, &addr, sizeof( addr ) ) == -1 )
+            {
+                fprintf( stderr, "Bind domain failed, with port %d\n", this->m_o_conf.GetListenPort() );
+                return -1;
+            }
+            return listen( this->m_n_socket, SI_QUEUE ) != -1;
+        }
+
+        virtual void PreQuit() override
+        {
+            if( this->m_n_socket != -1 )
+            {
+                close( this->m_n_socket );
+            }
+        }
+
+        virtual void Tick() override
+        {
+            if( this->m_n_socket != -1 )
+            {
+                //  accept( this->m_n_socket );
+            }
+        }
+
+        int m_n_socket;
     };
 };
 

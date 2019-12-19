@@ -8,6 +8,7 @@
 #if defined( linux ) or defined( __GNUC__ )
 #include <unistd.h>
 #include <signal.h>
+#include <arpa/inet.h>
 #endif
 #include <seadrip/KvFileReader.hpp>
 #include <seadrip/LinuxSigMap.h>
@@ -82,6 +83,10 @@ namespace SeaDrip
                 std::string key, val;
                 while( cfg.Next( key, val ) )
                 {
+                    if( val.empty() )
+                    {
+                        continue;
+                    }
                     if( !this->CfgFileOverride( key, val ) )
                     {
                         std::cout << "Unknown config item: " << key << std::endl;
@@ -123,8 +128,48 @@ namespace SeaDrip
             }
             return false;
         }
+
+    private:
         TConfigProperty<std::string> m_s_pid_path;
         TConfigProperty<int> m_n_exit_sig;
+    };
+
+    #ifndef DEF_LISTEN_PORT
+        #define DEF_LISTEN_PORT 0
+        #error 'DEF_LISTEN_PORT' not defined
+    #endif
+    class SocketDaemonConfig : public DaemonConfig
+    {
+    public:
+        SocketDaemonConfig( std::string def_cfg_path ) : DaemonConfig( def_cfg_path ),
+            m_n_listen_port( DEF_LISTEN_PORT ), m_n_sock_addr( INADDR_ANY ) {}
+        int GetListenPort() const noexcept { return this->m_n_listen_port.Get(); }
+        in_addr_t GetSockAddr() const noexcept { return this->m_n_sock_addr.Get(); }
+
+    protected:
+        virtual bool CfgFileOverride( std::string key, std::string val ) override
+        {
+            if( DaemonConfig::CfgFileOverride( key, val ) )
+            {
+                return true;
+            }
+            if( key == "sock_addr" )
+            {
+                //  translate val to in_addr_t
+                this->m_n_sock_addr.Set( EConfigSetFrom::CFGFILE, INADDR_ANY );
+                return true;
+            }
+            if( key == "listen" )
+            {
+                this->m_n_listen_port.Set( EConfigSetFrom::CFGFILE, atoi( val.c_str() ) );
+                return true;
+            }
+            return false;
+        }
+
+    private:
+        TConfigProperty<int> m_n_listen_port;
+        TConfigProperty<in_addr_t> m_n_sock_addr;
     };
 };
 
