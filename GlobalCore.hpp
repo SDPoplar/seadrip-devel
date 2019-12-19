@@ -54,7 +54,7 @@ namespace SeaDrip
 
     template<typename T>
     T* SingletonCore<T>::g_p_core = nullptr;
-    
+
 #if defined( linux ) or defined( __GNUC__ )
     template<typename Conf, typename std::enable_if<std::is_base_of<SeaDrip::DaemonConfig, Conf>{}, int>::type = 0>
 #else
@@ -92,7 +92,8 @@ namespace SeaDrip
                 pid << getpid();
                 pid.close();
             }
-            signal( SIGUSR2, []( int sig )->void {
+            //  bind linux signals
+            signal( this->m_o_conf.GetExitSig(), []( int sig )->void {
                 auto core = DaemonCore::Get();
                 if( core->IsRunning() )
                 {
@@ -104,7 +105,6 @@ namespace SeaDrip
 
         void Release() override
         {
-            //  this->m_b_run_switch = this->valid();
             std::string pidpath = this->m_o_conf.GetPidPath();
             if( !pidpath.empty() )
             {

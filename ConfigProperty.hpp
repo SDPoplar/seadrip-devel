@@ -7,8 +7,10 @@
 #include <functional>
 #if defined( linux ) or defined( __GNUC__ )
 #include <unistd.h>
+#include <signal.h>
 #endif
 #include <seadrip/KvFileReader.hpp>
+#include <seadrip/LinuxSigMap.h>
 
 namespace SeaDrip
 {
@@ -99,8 +101,9 @@ namespace SeaDrip
     class DaemonConfig : public BaseConfig
     {
     public:
-        DaemonConfig( std::string def_cfg_path ) : BaseConfig( def_cfg_path ), m_s_pid_path( "" ) {}
+        DaemonConfig( std::string def_cfg_path ) : BaseConfig( def_cfg_path ), m_s_pid_path( "" ), m_n_exit_sig( SIGUSR2 ) {}
         std::string GetPidPath( void ) const noexcept { return this->m_s_pid_path.Get(); }
+        int GetExitSig( void ) const noexcept { return this->m_n_exit_sig.Get(); }
 
     protected:
         virtual bool CfgFileOverride( std::string key, std::string val ) override
@@ -110,9 +113,18 @@ namespace SeaDrip
                 this->m_s_pid_path.Set( EConfigSetFrom::CFGFILE, val );
                 return true;
             }
+            if( key == "exit_sig" )
+            {
+                std::string upperval = boost::to_upper_copy( val );
+                auto sigfound = linux_sig_map.find( upperval );
+                int nsig = ( sigfound != linux_sig_map.end() ) ? sigfound->second : atoi( val.c_str() );
+                this->m_n_exit_sig.Set( EConfigSetFrom::CFGFILE, nsig );
+                return true;
+            }
             return false;
         }
         TConfigProperty<std::string> m_s_pid_path;
+        TConfigProperty<int> m_n_exit_sig;
     };
 };
 
