@@ -68,10 +68,27 @@ namespace SeaDrip
         #define DEF_CFG_PATH ""
         #error 'DEF_CFG_PATH' not defined
     #endif
-        DaemonCore() : SingletonCore<DaemonCore>(), m_o_conf( DEF_CFG_PATH ), m_b_run_switch( false ) {}
+        DaemonCore() : SingletonCore<DaemonCore>(), m_o_conf( DEF_CFG_PATH ), m_b_run_switch( false ), m_b_pid_saved( false ) {}
+        bool SavePid( int pid )
+        {
+            std::string pidpath = this->m_o_conf.GetPidPath();
+            if( pidpath.empty() )
+            {
+                return false;
+            }
+            std::ofstream fpid( pidpath, std::ios::out );
+            if( !fpid )
+            {
+                return false;
+            }
+            fpid << pid;
+            fpid.close();
+            return true;
+        }
 
         Conf m_o_conf;
         bool m_b_run_switch;
+        bool m_b_pid_saved;
 
     public:
         Conf* GetConfig()
@@ -79,19 +96,23 @@ namespace SeaDrip
             return &this->m_o_conf;
         }
 
-        bool ReadyToRun() override
+        virtual bool ReadyToRun() override
         {
             std::string pidpath = this->m_o_conf.GetPidPath();
-            if( !pidpath.empty() )
+            int npid = getpid();
+            
+            if( !this->SavePid( npid ) || daemon( 1, 1 ) )
             {
-                std::ofstream pid( pidpath, std::ios::out );
-                if( !pid )
-                {
-                    return false;
-                }
-                pid << getpid();
-                pid.close();
+                std::cout << "Create daemon failed" << std::endl;
+                return false;
             }
+            
+            int dpid = getpid();
+            if( npid == dpid )
+            {
+                return false;
+            }
+            this->SavePid( dpid );
             //  bind linux signals
             signal( this->m_o_conf.GetExitSig(), []( int sig )->void {
                 auto core = DaemonCore::Get();
@@ -100,13 +121,14 @@ namespace SeaDrip
                     core->Quit();
                 }
             } );
+            this->m_b_pid_saved = true;
             return true;
         }
 
         void Release() override
         {
             std::string pidpath = this->m_o_conf.GetPidPath();
-            if( !pidpath.empty() )
+            if( !pidpath.empty() && this->m_b_pid_saved )
             {
                 remove( pidpath.c_str() );
             }
