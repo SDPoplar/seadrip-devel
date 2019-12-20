@@ -1,1 +1,0 @@
-const char* sdtpl_test = "#include <string>\nnamespace SeaDrip\n{\n    namespace __REPFLAG_TEST__\n    {\n        class __REPFLAG_CLS_NAME__\n        {\n        public:\n            __REPFLAG_CLASS_NAME__();\n            __REPFLAG_TEST_STR__\n        };\n    }\n}\n";

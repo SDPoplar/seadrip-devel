@@ -1,7 +1,5 @@
-#include "seadrip/IniFileReader.h"
 #include "seadrip/KvFileReader.h"
 #include <boost/algorithm/string.hpp>
-#include <boost/regex.hpp>
 using namespace SeaDrip;
 
 #ifndef MAX_LINE_LEN
@@ -22,7 +20,7 @@ IniFileReader::~IniFileReader()
     }
 }
 
-bool IniFileReader::TryGetLine()
+bool IniFileReader::TryGetLine( std::string& out )
 {
     if( this->eof() )
     {

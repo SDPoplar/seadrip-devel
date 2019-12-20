@@ -1,11 +1,16 @@
 #include "seadrip/ConfigProperty.hpp"
+#if defined( linux ) or defined( __GNUC__ )
+#include <unistd.h>
+#include <signal.h>
+#include <arpa/inet.h>
+#endif
 #include "seadrip/LinuxSigMap.h"
 #include "seadrip/KvFileReader.hpp"
 using namespace SeaDrip;
 
 //  ==================  BaseConfig  ============================================
 
-BaseConfig::BaseConfig() : m_s_config_file( def_cfg_path )
+BaseConfig::BaseConfig( std::string def_cfg_path ) : m_s_config_file( def_cfg_path )
 {}
 
 void BaseConfig::Init( int argc, char** argv )
@@ -52,7 +57,8 @@ void BaseConfig::Init( int argc, char** argv )
 //  ================    DaemonConfig    =================================================
 
 DaemonConfig::DaemonConfig( std::string def_cfg_path ) : BaseConfig( def_cfg_path ),
-    m_s_pid_path( "" ), m_n_exit_sig( SIGUSR2 ), m_s_log_path( "" )
+    m_s_pid_path( "" ), m_n_exit_sig( SIGUSR2 ), m_s_log_path( "" ),
+    m_e_log_level( ELogLevel::Error ), m_set_force_save( {} )
 {}
 
 bool DaemonConfig::CfgFileOverride( std::string key, std::string val )

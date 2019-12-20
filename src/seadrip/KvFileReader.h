@@ -1,8 +1,8 @@
 #ifndef __SD_KVFILE_READER_H__
 #define __SD_KVFILE_READER_H__
 
-#include <string>
 #include "IniFileReader.h"
+#include <boost/regex.hpp>
 
 namespace SeaDrip
 {
@@ -16,7 +16,7 @@ namespace SeaDrip
         protected:
             bool ParseLine( std::string line ) override;
 
-            const class boost::regex m_regex_pattern;
+            const boost::regex m_regex_pattern;
 
             std::string m_s_last_key;
             std::string m_s_last_val;

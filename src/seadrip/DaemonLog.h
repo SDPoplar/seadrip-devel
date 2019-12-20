@@ -1,10 +1,9 @@
-#pragma once
+#ifndef     __SD_DAEMON_LOG_H__
+#define     __SD_DAEMON_LOG_H__
 
 #include <set>
 #include <string>
 #include <fstream>
-
-#include "ConfigProperty.hpp"
 
 namespace SeaDrip
 {
@@ -23,7 +22,7 @@ namespace SeaDrip
         DaemonLog( std::string path );
         virtual ~DaemonLog();
 
-        bool Init( const DaemonConfig& cfg );
+        bool Init( const class DaemonConfig& cfg );
 
         bool Error( std::string content );
         bool Warn( std::string content );
@@ -39,6 +38,9 @@ namespace SeaDrip
         std::string m_s_path;
         std::ofstream* m_file_log;
         ELogLevel m_e_log_level;
-        const std::set<ELogLevel>& m_set_force_save;
+        const std::set<ELogLevel>* m_p_set_force_save;
     };
 };
+
+#endif
+

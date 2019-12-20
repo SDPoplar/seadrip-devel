@@ -70,7 +70,7 @@ namespace SeaDrip
         int GetExitSig( void ) const noexcept { return this->m_n_exit_sig.Get(); }
         std::string GetLogPath( void ) const noexcept { return this->m_s_log_path.Get(); }
         ELogLevel GetLogLevel() const noexcept { return this->m_e_log_level; }
-        std::set<ELogLevel>& GetLogForceSave() const noexcept { return this->m_set_force_save; }
+        const std::set<ELogLevel>& GetLogForceSave() const noexcept { return this->m_set_force_save; }
 
     protected:
         virtual bool CfgFileOverride( std::string key, std::string val ) override;

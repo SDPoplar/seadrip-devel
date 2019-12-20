@@ -1,8 +1,9 @@
 #include "seadrip/DaemonLog.h"
+#include "seadrip/ConfigProperty.hpp"
 using namespace SeaDrip;
 
 DaemonLog::DaemonLog( std::string path = "" ) : m_s_path( path ), m_file_log( nullptr ),
-    m_e_log_level( ELogLevel::Error )
+    m_e_log_level( ELogLevel::Error ), m_p_set_force_save( nullptr )
 {}
 
 DaemonLog::~DaemonLog()
@@ -36,7 +37,7 @@ bool DaemonLog::Init( const DaemonConfig& cfg )
     }
     //  load log level and force save
     this->m_e_log_level = cfg.GetLogLevel();
-    this->m_set_force_save = cfg.GetLogForceSave();
+    this->m_p_set_force_save = &( cfg.GetLogForceSave() );
     return true;
 }
 
@@ -47,7 +48,7 @@ bool DaemonLog::IsLogOpened() const noexcept
 
 bool DaemonLog::InForceSave( ELogLevel level ) const noexcept
 {
-    return this->m_set_force_save.find( level ) != this->m_set_force_save.end();
+    return this->m_p_set_force_save && ( this->m_p_set_force_save->find( level ) != this->m_p_set_force_save->end() );
 }
 
 bool DaemonLog::Log( ELogLevel level, std::string content )
