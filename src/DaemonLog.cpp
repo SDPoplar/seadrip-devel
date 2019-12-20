@@ -1,4 +1,4 @@
-#include "../seadrip/DaemonLog.h"
+#include "seadrip/DaemonLog.h"
 using namespace SeaDrip;
 
 bool DaemonLog::~DaemonLog()
