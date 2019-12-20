@@ -39,6 +39,6 @@ namespace SeaDrip
         std::string m_s_path;
         std::ofstream* m_file_log;
         ELogLevel m_e_log_level;
-        std::set<ELogLevel> m_set_force_save;
+        const std::set<ELogLevel>& m_set_force_save;
     };
 };

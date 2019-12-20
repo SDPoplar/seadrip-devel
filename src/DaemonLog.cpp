@@ -35,6 +35,8 @@ bool DaemonLog::Init( const DaemonConfig& cfg )
         return false;
     }
     //  load log level and force save
+    this->m_e_log_level = cfg.GetLogLevel();
+    this->m_set_force_save = cfg.GetLogForceSave();
     return true;
 }
 

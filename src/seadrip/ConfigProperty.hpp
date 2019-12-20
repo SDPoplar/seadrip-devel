@@ -8,6 +8,7 @@
 #include <signal.h>
 #include <arpa/inet.h>
 #endif
+#include "DaemonLog.h"
 
 namespace SeaDrip
 {
@@ -68,6 +69,8 @@ namespace SeaDrip
         std::string GetPidPath( void ) const noexcept { return this->m_s_pid_path.Get(); }
         int GetExitSig( void ) const noexcept { return this->m_n_exit_sig.Get(); }
         std::string GetLogPath( void ) const noexcept { return this->m_s_log_path.Get(); }
+        ELogLevel GetLogLevel() const noexcept { return this->m_e_log_level; }
+        std::set<ELogLevel>& GetLogForceSave() const noexcept { return this->m_set_force_save; }
 
     protected:
         virtual bool CfgFileOverride( std::string key, std::string val ) override;
@@ -76,11 +79,13 @@ namespace SeaDrip
         TConfigProperty<std::string> m_s_pid_path;
         TConfigProperty<int> m_n_exit_sig;
         TConfigProperty<std::string> m_s_log_path;
+        ELogLevel m_e_log_level;
+        std::set<ELogLevel> m_set_force_save;
     };
 
     #ifndef DEF_LISTEN_PORT
         #define DEF_LISTEN_PORT 0
-        #error 'DEF_LISTEN_PORT' not defined
+        //  #error 'DEF_LISTEN_PORT' not defined
     #endif
     class SocketDaemonConfig : public DaemonConfig
     {
