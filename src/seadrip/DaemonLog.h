@@ -1,6 +1,6 @@
 #pragma once
 
-#include <vector>
+#include <set>
 #include <string>
 #include <fstream>
 
@@ -8,7 +8,7 @@
 
 namespace SeaDrip
 {
-    enum class ELogLevel : uint8_t
+    enum class ELogLevel : int
     {
         None        = 0,
         Error       = 1,
@@ -20,7 +20,7 @@ namespace SeaDrip
     class DaemonLog
     {
     public:
-        DaemonLog( std::string path ) : m_s_path( "" ), m_file_log( nullptr ) = default;
+        DaemonLog( std::string path );
         virtual ~DaemonLog();
 
         bool Init( const DaemonConfig& cfg );
@@ -39,6 +39,6 @@ namespace SeaDrip
         std::string m_s_path;
         std::ofstream* m_file_log;
         ELogLevel m_e_log_level;
-        std::vector<ELogLevel> m_arr_force_save;
+        std::set<ELogLevel> m_set_force_save;
     };
 };
