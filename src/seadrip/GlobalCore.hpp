@@ -27,10 +27,7 @@ namespace SeaDrip
             return SingletonCore<T>::g_p_core ? SingletonCore<T>::g_p_core : new T();
         }
 
-        bool IsRunning() const noexcept
-        {
-            return this->m_b_run_switch;
-        }
+        bool IsRunning() const noexcept;
 
         int Run()
         {

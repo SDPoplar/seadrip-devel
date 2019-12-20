@@ -10,6 +10,9 @@ build/common-config.o: src/CommonConfig.cpp src/seadrip/ConfigProperty.hpp
 build/ini-file-reader.o: src/IniReader.cpp src/seadrip/IniFileReader.h src/seadrip/KvFileReader.h
 	g++ -c -std=c++11 src/IniReader.cpp -lboost_regex -o build/ini-file-reader.o
 
+build/common-core.o: src/CommonCore.cpp src/seadrip/GlobalCore.hpp
+	g++ -c -std=c++11 src/CommonCore.cpp -o build/common-core.o
+
 pre:
 	chmod +x checkpath.sh
 	./checkpath.sh build
