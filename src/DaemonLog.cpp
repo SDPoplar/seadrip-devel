@@ -62,7 +62,7 @@ bool DaemonLog::Log( ELogLevel level, std::string content )
         return false;
     }
         
-    *(this->m_file_log) << content;
+    *(this->m_file_log) << content << std::endl;
     return true;
 }
 

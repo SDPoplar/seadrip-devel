@@ -10,8 +10,10 @@ using namespace SeaDrip;
 
 //  ==================  BaseConfig  ============================================
 
-BaseConfig::BaseConfig( std::string def_cfg_path ) : m_s_config_file( def_cfg_path )
-{}
+BaseConfig::BaseConfig()
+{
+    this->m_s_config_file.Set( EConfigSetFrom::DEF, this->DefCfgPath() );
+}
 
 void BaseConfig::Init( int argc, char** argv )
 {
@@ -81,9 +83,10 @@ bool DaemonConfig::CfgFileOverride( std::string key, std::string val )
 
 //  =====================   SocketDaemonConfig  ============================================
 
-SocketDaemonConfig::SocketDaemonConfig( std::string def_cfg_path ) : DaemonConfig( def_cfg_path ),
-    m_n_listen_port( DEF_LISTEN_PORT ), m_n_sock_addr( INADDR_ANY )
-{}
+SocketDaemonConfig::SocketDaemonConfig() : DaemonConfig(), m_n_sock_addr( INADDR_ANY )
+{
+    this->m_n_listen_port.Set( EConfigSetFrom::DEF, this->DefListenPort() );
+}
 
 bool SocketDaemonConfig::CfgFileOverride( std::string key, std::string val )
 {

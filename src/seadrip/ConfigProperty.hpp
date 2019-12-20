@@ -50,10 +50,11 @@ namespace SeaDrip
     class BaseConfig
     {
         public:
-            BaseConfig( std::string def_cfg_path );
+            BaseConfig();
             void Init( int argc, char** argv );
 
         protected:
+            virtual char* DefCfgPath() const noexcept = 0;
             virtual void ShellOverride( char shell_flag, std::string val ) = 0;
             virtual bool CfgFileOverride( std::string key, std::string val ) { return false; };
 
@@ -83,18 +84,15 @@ namespace SeaDrip
         std::set<ELogLevel> m_set_force_save;
     };
 
-    #ifndef DEF_LISTEN_PORT
-        #define DEF_LISTEN_PORT 0
-        //  #error 'DEF_LISTEN_PORT' not defined
-    #endif
     class SocketDaemonConfig : public DaemonConfig
     {
     public:
-        SocketDaemonConfig( std::string def_cfg_path );
+        SocketDaemonConfig();
         int GetListenPort() const noexcept { return this->m_n_listen_port.Get(); }
         in_addr_t GetSockAddr() const noexcept { return this->m_n_sock_addr.Get(); }
 
     protected:
+        virtual int DefListenPort() const noexcept = 0;
         virtual bool CfgFileOverride( std::string key, std::string val ) override;
 
     private:
