@@ -56,7 +56,7 @@ namespace SeaDrip
             void Init( int argc, char** argv );
 
         protected:
-            virtual std::string DefCfgPath() const noexcept = 0;
+            virtual std::string DefCfgPath() const noexcept;
             virtual void ShellOverride( char shell_flag, std::string val ) = 0;
             virtual bool CfgFileOverride( std::string key, std::string val ) { return false; };
 
@@ -94,7 +94,7 @@ namespace SeaDrip
         in_addr_t GetSockAddr() const noexcept { return this->m_n_sock_addr.Get(); }
 
     protected:
-        virtual int DefListenPort() const noexcept = 0;
+        virtual int DefListenPort() const noexcept;
         virtual bool CfgFileOverride( std::string key, std::string val ) override;
 
         TConfigProperty<int> m_n_listen_port;

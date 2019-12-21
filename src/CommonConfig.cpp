@@ -37,6 +37,10 @@ void BaseConfig::Init( int argc, char** argv )
         }
     }
 #endif
+    if( this->m_s_config_file.Get().empty() )
+    {
+        return;
+    }
     KvFileReader cfg( this->m_s_config_file.Get(), '#' );
     if( !cfg )
     {
@@ -54,6 +58,11 @@ void BaseConfig::Init( int argc, char** argv )
             std::cout << "Unknown config item: " << key << std::endl;
         }
     }
+}
+
+std::string BaseConfig::DefCfgPath() const noexcept
+{
+    return "";
 }
 
 //  ================    DaemonConfig    =================================================
@@ -106,3 +115,9 @@ bool SocketDaemonConfig::CfgFileOverride( std::string key, std::string val )
     }
     return false;
 }
+
+int SocketDaemonConfig::DefListenPort() const noexcept
+{
+    return 0;
+}
+
