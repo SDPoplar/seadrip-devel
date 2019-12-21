@@ -6,6 +6,7 @@
 #endif
 #include "seadrip/LinuxSigMap.h"
 #include "seadrip/KvFileReader.hpp"
+#include <iostream>
 using namespace SeaDrip;
 
 //  ==================  BaseConfig  ============================================
@@ -39,11 +40,13 @@ void BaseConfig::Init( int argc, char** argv )
 #endif
     if( this->m_s_config_file.Get().empty() )
     {
+        std::cout << "No config file given" << std::endl;
         return;
     }
     KvFileReader cfg( this->m_s_config_file.Get(), '#' );
     if( !cfg )
     {
+        std::cout << "Cannot open config file: " << this->m_s_config_file.Get() << std::endl;
         return;
     }
     std::string key, val;
@@ -71,6 +74,25 @@ DaemonConfig::DaemonConfig() : BaseConfig(), m_s_pid_path( "" ), m_n_exit_sig( S
     m_s_log_path( "" ), m_e_log_level( ELogLevel::Error ), m_set_force_save( {} )
 {}
 
+bool TransLogLevel( std::string cfg, ELogLevel& level )
+{
+    const std::map<std::string, ELogLevel> lm = {
+        std::make_pair( "DEBUG", ELogLevel::Debug ),
+        std::make_pair( "ERROR", ELogLevel::Error ),
+        std::make_pair( "WARN", ELogLevel::Warn ),
+        std::make_pair( "NONE", ELogLevel::None ),
+        std::make_pair( "INFO", ELogLevel::Info )
+    };
+    std::string target = boost::to_upper_copy( cfg );
+    auto cursor = lm.find( target );
+    if( cursor != lm.end() )
+    {
+        level = cursor->second;
+        return true;
+    }
+    return false;
+}
+
 bool DaemonConfig::CfgFileOverride( std::string key, std::string val )
 {
     if( key == "pid" )
@@ -85,6 +107,20 @@ bool DaemonConfig::CfgFileOverride( std::string key, std::string val )
         int nsig = (sigfound != linux_sig_map.end()) ? sigfound->second : atoi( val.c_str() );
         this->m_n_exit_sig.Set( EConfigSetFrom::CFGFILE, nsig );
         return true;
+    }
+    if( key == "log" )
+    {
+        this->m_s_config_file.Set( EConfigSetFrom::CFGFILE, val );
+        return true;
+    }
+    if( key == "log_level" )
+    {
+        ELogLevel level;
+        if( TransLogLevel( val, level ) )
+        {
+            this->m_e_log_level = level;
+            return true;
+        }
     }
     return false;
 }
