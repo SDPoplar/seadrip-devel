@@ -19,7 +19,7 @@ namespace SeaDrip
     class DaemonLog
     {
     public:
-        DaemonLog( std::string path );
+        DaemonLog( std::string path = "" );
         virtual ~DaemonLog();
 
         bool Init( const class DaemonConfig& cfg );

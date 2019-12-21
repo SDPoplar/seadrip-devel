@@ -2,7 +2,7 @@
 #include "seadrip/ConfigProperty.hpp"
 using namespace SeaDrip;
 
-DaemonLog::DaemonLog( std::string path = "" ) : m_s_path( path ), m_file_log( nullptr ),
+DaemonLog::DaemonLog( std::string path ) : m_s_path( path ), m_file_log( nullptr ),
     m_e_log_level( ELogLevel::Error ), m_p_set_force_save( nullptr )
 {}
 

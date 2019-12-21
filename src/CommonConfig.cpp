@@ -58,9 +58,8 @@ void BaseConfig::Init( int argc, char** argv )
 
 //  ================    DaemonConfig    =================================================
 
-DaemonConfig::DaemonConfig( std::string def_cfg_path ) : BaseConfig( def_cfg_path ),
-    m_s_pid_path( "" ), m_n_exit_sig( SIGUSR2 ), m_s_log_path( "" ),
-    m_e_log_level( ELogLevel::Error ), m_set_force_save( {} )
+DaemonConfig::DaemonConfig() : BaseConfig(), m_s_pid_path( "" ), m_n_exit_sig( SIGUSR2 ),
+    m_s_log_path( "" ), m_e_log_level( ELogLevel::Error ), m_set_force_save( {} )
 {}
 
 bool DaemonConfig::CfgFileOverride( std::string key, std::string val )

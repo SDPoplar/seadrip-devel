@@ -14,10 +14,11 @@ namespace SeaDrip
 {
     enum class EConfigSetFrom : int
     {
-        DEF = 0,
-        CFGFILE =  1,
-        SHELL = 2,
-        RUNTIME = 3
+        NOTSET = 0,
+        DEF = 1,
+        CFGFILE =  2,
+        SHELL = 3,
+        RUNTIME = 4
     };
 
     template <typename T> class TConfigProperty
@@ -26,9 +27,10 @@ namespace SeaDrip
             SeaDrip::EConfigSetFrom m_e_from;
             T m_o_val;
         public:
-            TConfigProperty( T def ) : m_e_from( SeaDrip::EConfigSetFrom::DEF ), m_o_val( def ) {}
+            TConfigProperty() : m_e_from( EConfigSetFrom::NOTSET ) {}
+            TConfigProperty( T def ) : m_e_from( EConfigSetFrom::DEF ), m_o_val( def ) {}
             virtual ~TConfigProperty() {}
-            bool Set( SeaDrip::EConfigSetFrom from, T val )
+            bool Set( EConfigSetFrom from, T val )
             {
                 bool canset = static_cast<int>( from ) > static_cast<int>( this->m_e_from );
                 if( !canset )
@@ -54,7 +56,7 @@ namespace SeaDrip
             void Init( int argc, char** argv );
 
         protected:
-            virtual char* DefCfgPath() const noexcept = 0;
+            virtual std::string DefCfgPath() const noexcept = 0;
             virtual void ShellOverride( char shell_flag, std::string val ) = 0;
             virtual bool CfgFileOverride( std::string key, std::string val ) { return false; };
 
@@ -66,7 +68,7 @@ namespace SeaDrip
     class DaemonConfig : public BaseConfig
     {
     public:
-        DaemonConfig( std::string def_cfg_path );
+        DaemonConfig();
         std::string GetPidPath( void ) const noexcept { return this->m_s_pid_path.Get(); }
         int GetExitSig( void ) const noexcept { return this->m_n_exit_sig.Get(); }
         std::string GetLogPath( void ) const noexcept { return this->m_s_log_path.Get(); }
@@ -95,10 +97,10 @@ namespace SeaDrip
         virtual int DefListenPort() const noexcept = 0;
         virtual bool CfgFileOverride( std::string key, std::string val ) override;
 
-    private:
         TConfigProperty<int> m_n_listen_port;
         TConfigProperty<in_addr_t> m_n_sock_addr;
     };
 };
 
 #endif
+
