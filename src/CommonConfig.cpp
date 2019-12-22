@@ -11,10 +11,8 @@ using namespace SeaDrip;
 
 //  ==================  BaseConfig  ============================================
 
-BaseConfig::BaseConfig()
-{
-    this->m_s_config_file.Set( EConfigSetFrom::DEF, this->DefCfgPath() );
-}
+BaseConfig::BaseConfig( std::string def_cfg_path ) : m_s_config_file( def_cfg_path )
+{}
 
 void BaseConfig::Init( int argc, char** argv )
 {
@@ -63,35 +61,11 @@ void BaseConfig::Init( int argc, char** argv )
     }
 }
 
-std::string BaseConfig::DefCfgPath() const noexcept
-{
-    return "";
-}
-
 //  ================    DaemonConfig    =================================================
 
-DaemonConfig::DaemonConfig() : BaseConfig(), m_s_pid_path( "" ), m_n_exit_sig( SIGUSR2 ),
-    m_s_log_path( "" ), m_e_log_level( ELogLevel::Error ), m_set_force_save( {} )
+DaemonConfig::DaemonConfig( std::string def_cfg_path ) : BaseConfig( def_cfg_path ),
+    m_s_pid_path( "" ), m_n_exit_sig( SIGUSR2 ), m_s_log_path( "" ), m_s_log_level( "" )
 {}
-
-bool TransLogLevel( std::string cfg, ELogLevel& level )
-{
-    const std::map<std::string, ELogLevel> lm = {
-        std::make_pair( "DEBUG", ELogLevel::Debug ),
-        std::make_pair( "ERROR", ELogLevel::Error ),
-        std::make_pair( "WARN", ELogLevel::Warn ),
-        std::make_pair( "NONE", ELogLevel::None ),
-        std::make_pair( "INFO", ELogLevel::Info )
-    };
-    std::string target = boost::to_upper_copy( cfg );
-    auto cursor = lm.find( target );
-    if( cursor != lm.end() )
-    {
-        level = cursor->second;
-        return true;
-    }
-    return false;
-}
 
 bool DaemonConfig::CfgFileOverride( std::string key, std::string val )
 {
@@ -115,22 +89,17 @@ bool DaemonConfig::CfgFileOverride( std::string key, std::string val )
     }
     if( key == "log_level" )
     {
-        ELogLevel level;
-        if( TransLogLevel( val, level ) )
-        {
-            this->m_e_log_level = level;
-            return true;
-        }
+        this->m_s_log_level.Set( EConfigSetFrom::CFGFILE, val );
+        return true;
     }
     return false;
 }
 
 //  =====================   SocketDaemonConfig  ============================================
 
-SocketDaemonConfig::SocketDaemonConfig() : DaemonConfig(), m_n_sock_addr( INADDR_ANY )
-{
-    this->m_n_listen_port.Set( EConfigSetFrom::DEF, this->DefListenPort() );
-}
+SocketDaemonConfig::SocketDaemonConfig( std::string def_cfg_path, int def_listen_port )
+    : DaemonConfig( def_cfg_path ), m_n_sock_addr( INADDR_ANY ), m_n_listen_port( def_listen_port )
+{}
 
 bool SocketDaemonConfig::CfgFileOverride( std::string key, std::string val )
 {
@@ -150,10 +119,5 @@ bool SocketDaemonConfig::CfgFileOverride( std::string key, std::string val )
         return true;
     }
     return false;
-}
-
-int SocketDaemonConfig::DefListenPort() const noexcept
-{
-    return 0;
 }
 

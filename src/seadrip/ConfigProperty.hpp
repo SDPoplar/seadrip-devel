@@ -52,11 +52,10 @@ namespace SeaDrip
     class BaseConfig
     {
         public:
-            BaseConfig();
+            BaseConfig( std::string def_cfg_path = "" );
             void Init( int argc, char** argv );
 
         protected:
-            virtual std::string DefCfgPath() const noexcept;
             virtual void ShellOverride( char shell_flag, std::string val ) = 0;
             virtual bool CfgFileOverride( std::string key, std::string val ) { return false; };
 
@@ -68,12 +67,11 @@ namespace SeaDrip
     class DaemonConfig : public BaseConfig
     {
     public:
-        DaemonConfig();
+        DaemonConfig( std::string def_cfg_path = "" );
         std::string GetPidPath( void ) const noexcept { return this->m_s_pid_path.Get(); }
         int GetExitSig( void ) const noexcept { return this->m_n_exit_sig.Get(); }
         std::string GetLogPath( void ) const noexcept { return this->m_s_log_path.Get(); }
-        ELogLevel GetLogLevel() const noexcept { return this->m_e_log_level; }
-        const std::set<ELogLevel>& GetLogForceSave() const noexcept { return this->m_set_force_save; }
+        std::string GetLogLevel() const noexcept { return this->m_s_log_level.Get(); }
 
     protected:
         virtual bool CfgFileOverride( std::string key, std::string val ) override;
@@ -82,19 +80,17 @@ namespace SeaDrip
         TConfigProperty<std::string> m_s_pid_path;
         TConfigProperty<int> m_n_exit_sig;
         TConfigProperty<std::string> m_s_log_path;
-        ELogLevel m_e_log_level;
-        std::set<ELogLevel> m_set_force_save;
+        TConfigProperty<std::string> m_s_log_level;
     };
 
     class SocketDaemonConfig : public DaemonConfig
     {
     public:
-        SocketDaemonConfig();
+        SocketDaemonConfig( std::string def_cfg_path = "", int def_listen_port = 0 );
         int GetListenPort() const noexcept { return this->m_n_listen_port.Get(); }
         in_addr_t GetSockAddr() const noexcept { return this->m_n_sock_addr.Get(); }
 
     protected:
-        virtual int DefListenPort() const noexcept;
         virtual bool CfgFileOverride( std::string key, std::string val ) override;
 
         TConfigProperty<int> m_n_listen_port;

@@ -1,68 +1,104 @@
 #include "seadrip/DaemonLog.h"
-#include "seadrip/ConfigProperty.hpp"
+#include <map>
 using namespace SeaDrip;
 
-DaemonLog::DaemonLog( std::string path ) : m_s_path( path ), m_file_log( nullptr ),
-    m_e_log_level( ELogLevel::Error ), m_p_set_force_save( nullptr )
+const std::map<std::string, ELogLevel> levelstrmap = {
+    std::make_pair( "NONE", ELogLevel::None ),
+    std::make_pair( "ERROR", ELogLevel::Error ),
+    std::make_pair( "WARN", ELogLevel::Warn ),
+    std::make_pair( "INFO", ELogLevel::Info ),
+    std::make_pair( "DEBUG", ELogLevel::Debug ),
+};
+
+DaemonLog::DaemonLog( std::string path ) : m_s_path( path ), m_file_log(),
+    m_e_log_level( ELogLevel::Error ), m_set_force_save( {} ), m_set_unsave( {} )
 {}
 
 DaemonLog::~DaemonLog()
 {
-    if( this->m_file_log )
+    if( this->m_file_log.is_open() )
     {
-        if( this->m_file_log->is_open() )
-        {
-            this->m_file_log->close();
-        }
-        delete this->m_file_log;
-        this->m_file_log = nullptr;
+        this->m_file_log.close();
     }
 }
 
-bool DaemonLog::Init( const DaemonConfig& cfg )
+void DaemonLog::SetLogPath( std::string path )
 {
-    std::string cfg_log_path = cfg.GetLogPath();
-    if( !cfg_log_path.empty() )
+    if( this->m_s_path == path )
     {
-        this->m_s_path = cfg_log_path;
+        return;
     }
-    if( this->m_file_log || this->m_s_path.empty() )
+    if( this->m_file_log.is_open() )
     {
-        return false;
+        this->m_file_log.close();
     }
-    this->m_file_log = new std::ofstream( this->m_s_path, std::ios::out | std::ios::app );
-    if( !this->m_file_log->is_open() )
+    this->m_s_path = path;
+}
+
+bool DaemonLog::SetLogLevel( std::string conf )
+{
+    if( conf.empty() )
     {
-        return false;
+        return true;
     }
-    //  load log level and force save
-    this->m_e_log_level = cfg.GetLogLevel();
-    this->m_p_set_force_save = &( cfg.GetLogForceSave() );
+    auto match = levelstrmap.find( conf );
+    return ( match != levelstrmap.end() ) &&  this->SetLogLevel( match->second );
+}
+
+bool DaemonLog::SetLogLevel( ELogLevel level, const std::set<ELogLevel> force,
+    const std::set<ELogLevel> ignore )
+{
+    this->m_e_log_level = level;
+    if( !force.empty() )
+    {
+        this->m_set_force_save = force;
+    }
+    if( !ignore.empty() )
+    {
+        this->m_set_unsave = ignore;
+    }
     return true;
-}
-
-bool DaemonLog::IsLogOpened() const noexcept
-{
-    return this->m_file_log && this->m_file_log->is_open();
 }
 
 bool DaemonLog::InForceSave( ELogLevel level ) const noexcept
 {
-    return this->m_p_set_force_save && ( this->m_p_set_force_save->find( level ) != this->m_p_set_force_save->end() );
+    return this->m_set_force_save.find( level ) != this->m_set_force_save.end();
+}
+
+bool DaemonLog::InUnsave( ELogLevel level ) const noexcept
+{
+    return this->m_set_unsave.find( level ) != this->m_set_unsave.end();
+}
+
+bool DaemonLog::LevelShouldSave( ELogLevel level ) const noexcept
+{
+    if( this->InForceSave( level ) )
+    {
+        return true;
+    }
+    if( this->InUnsave( level ) )
+    {
+        return false;
+    }
+    return static_cast<int>( level ) <= static_cast<int>( this->m_e_log_level );
 }
 
 bool DaemonLog::Log( ELogLevel level, std::string content )
 {
-    if( !this->IsLogOpened() )
+    if( !this->LevelShouldSave( level ) )
     {
         return false;
     }
-    if( (static_cast<int>(level) < static_cast<int>(this->m_e_log_level)) && !this->InForceSave( level ) )
+    if( !this->m_file_log.is_open() && !this->m_s_path.empty() )
+    {
+        this->m_file_log.open( this->m_s_path, std::ios::out | std::ios::app );
+    }
+    if( !this->m_file_log.is_open() )
     {
         return false;
     }
         
-    *(this->m_file_log) << content << std::endl;
+    this->m_file_log << content << std::endl;
     return true;
 }
 

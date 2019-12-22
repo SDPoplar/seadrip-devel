@@ -22,7 +22,10 @@ namespace SeaDrip
         DaemonLog( std::string path = "" );
         virtual ~DaemonLog();
 
-        bool Init( const class DaemonConfig& cfg );
+        void SetLogPath( std::string path );
+        bool SetLogLevel( std::string conf );
+        bool SetLogLevel( ELogLevel level, const std::set<ELogLevel> force = {},
+                const std::set<ELogLevel> ignore = {} );
 
         bool Error( std::string content );
         bool Warn( std::string content );
@@ -32,13 +35,15 @@ namespace SeaDrip
     protected:
         bool Log( ELogLevel, std::string content );
 
-        bool IsLogOpened() const noexcept;
         bool InForceSave( ELogLevel level ) const noexcept;
+        bool InUnsave( ELogLevel level ) const noexcept;
+        bool LevelShouldSave( ELogLevel level ) const noexcept;
 
         std::string m_s_path;
-        std::ofstream* m_file_log;
+        std::ofstream m_file_log;
         ELogLevel m_e_log_level;
-        const std::set<ELogLevel>* m_p_set_force_save;
+        std::set<ELogLevel> m_set_force_save;
+        std::set<ELogLevel> m_set_unsave;
     };
 };
 

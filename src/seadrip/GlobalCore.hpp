@@ -140,7 +140,8 @@ namespace SeaDrip
                 }
             } );
             this->m_b_pid_saved = true;
-            return this->m_o_log.Init( this->m_o_conf );
+            this->m_o_log.SetLogPath( this->m_o_conf.GetLogPath() );
+            return this->m_o_log.SetLogLevel( this->m_o_conf.GetLogLevel() );
         }
 
         void Release() override
