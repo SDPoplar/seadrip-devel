@@ -8,6 +8,7 @@
 #include <fstream>
 #include <type_traits>
 #include "ConfigProperty.hpp"
+#include "RunCode.h"
 #include "DaemonLog.h"
 
 
@@ -16,6 +17,9 @@
 #else
     #define LIMIT_TEMPLATE( tpltype, basetype ) template<typename tpltype, typename std::enable_if <std::is_base_of<basetype, tpltype>::value, int>::type = 0 >
 #endif
+
+#define SDCORE_RET_FALSE( exp ) do { if( exp ) { return false; } } while( false )
+#define SDCORE_RET_FALSE_ERR( exp, code ) do { if( exp ) { this->Error( SD_RUNCODE( code ) ); return false; } } while( false )
 
 namespace SeaDrip
 {
@@ -41,6 +45,7 @@ namespace SeaDrip
                 this->Tick();
             }
             this->Release();
+            return this->m_n_runcode;
         }
 
         void Quit()
@@ -50,9 +55,11 @@ namespace SeaDrip
         }
 
     protected:
-        SingletonCore() : m_b_run_switch( false ) { g_p_core = static_cast<T *>( this ); }
+        SingletonCore() : m_b_run_switch( false ), m_n_runcode( SD_RUNCODE( ECoreRunCode::OK ) ) { g_p_core = static_cast<T *>( this ); }
         SingletonCore( const SingletonCore& obj ) {}
-        SingletonCore& operator = ( const SingletonCore& obj ) = default;
+        SingletonCore& operator = ( const SingletonCore& obj ) = delete;
+        //  void Error( ECoreRunCode code ) { this->Error( SD_RUNCODE( code ) ); }
+        void Error( int code ) { this->m_n_runcode = code; }
 
         virtual bool ReadyToRun() { return true; }
         virtual void Release() {}
@@ -62,6 +69,7 @@ namespace SeaDrip
     private:
         static T* g_p_core;
         bool m_b_run_switch;
+        int m_n_runcode;
     };
 
     template<typename T>
@@ -76,15 +84,9 @@ namespace SeaDrip
         bool SavePid( int pid = 0 )
         {
             std::string pidpath = this->m_o_conf.GetPidPath();
-            if( pidpath.empty() )
-            {
-                return false;
-            }
+            SDCORE_RET_FALSE_ERR( pidpath.empty(), EDaemonCoreRunCode::EMPTY_PID_PATH );
             std::ofstream fpid( pidpath, std::ios::out );
-            if( !fpid )
-            {
-                return false;
-            }
+            SDCORE_RET_FALSE_ERR( !fpid, EDaemonCoreRunCode::PID_FILE_CANNOT_SAVE );
             if( pid > 0 )
             {
                 fpid << pid;
@@ -113,23 +115,15 @@ namespace SeaDrip
     protected:
         virtual bool ReadyToRun() override
         {
-            if( !SingletonCore<DaemonCore<Conf>>::ReadyToRun() )
-            {
-                return false;
-            }
+            SDCORE_RET_FALSE( !SingletonCore<DaemonCore<Conf>>::ReadyToRun() );
             std::string pidpath = this->m_o_conf.GetPidPath();
             int npid = getpid();
-            
-            if( !this->SavePid() || daemon( 1, 1 ) )
-            {
-                return false;
-            }
+
+            SDCORE_RET_FALSE( !this->SavePid() );            
+            SDCORE_RET_FALSE_ERR( daemon( 1, 1 ), EDaemonCoreRunCode::CREATE_DAEMON_FAILED );
             
             int dpid = getpid();
-            if( npid == dpid )
-            {
-                return false;
-            }
+            SDCORE_RET_FALSE( npid == dpid );
             this->SavePid( dpid );
             //  bind linux signals
             signal( this->m_o_conf.GetExitSig(), []( int sig )->void {
@@ -140,8 +134,7 @@ namespace SeaDrip
                 }
             } );
             this->m_b_pid_saved = true;
-            this->m_o_log.SetLogPath( this->m_o_conf.GetLogPath() );
-            return this->m_o_log.SetLogLevel( this->m_o_conf.GetLogLevel() );
+            return this->m_o_log.Init( this->m_o_conf );
         }
 
         void Release() override
