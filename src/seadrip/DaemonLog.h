@@ -22,7 +22,7 @@ namespace SeaDrip
         DaemonLog( std::string path = "" );
         virtual ~DaemonLog();
 
-        void SetLogPath( std::string path );
+        bool SetLogPath( std::string path );
         bool SetLogLevel( std::string conf );
         bool SetLogLevel( ELogLevel level, const std::set<ELogLevel> force = {},
                 const std::set<ELogLevel> ignore = {} );

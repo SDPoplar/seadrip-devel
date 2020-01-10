@@ -14,7 +14,8 @@ namespace SeaDrip
         PID_FILE_CANNOT_SAVE = 2,
 
         CREATE_DAEMON_FAILED = 3,
-        INIT_LOG_FAILED = 4,
+        SET_LOG_PATH_FAILED = 4,
+        SET_LOG_LEVEL_FAILED = 5,
     };
 
     enum class ESocketDaemonCoreRunCode : int

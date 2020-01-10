@@ -136,7 +136,8 @@ namespace SeaDrip
                 }
             } );
             this->m_b_pid_saved = true;
-            SDCORE_RET_FALSE_ERR( !this->m_o_log.Init( this->m_o_conf ), EDaemonCoreRunCode::INIT_LOG_FAILED );
+            SDCORE_RET_FALSE_ERR( !this->m_o_log.SetLogPath( this->m_o_conf.GetLogPath() ), EDaemonCoreRunCode::SET_LOG_PATH_FAILED );
+            SDCORE_RET_FALSE_ERR( !this->m_o_log.SetLogLevel( this->m_o_conf.GetLogLevel() ), EDaemonCoreRunCode::SET_LOG_LEVEL_FAILED );
             return true;
         }
 

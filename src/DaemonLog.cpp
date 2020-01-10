@@ -22,17 +22,18 @@ DaemonLog::~DaemonLog()
     }
 }
 
-void DaemonLog::SetLogPath( std::string path )
+bool DaemonLog::SetLogPath( std::string path )
 {
     if( this->m_s_path == path )
     {
-        return;
+        return !path.empty();
     }
     if( this->m_file_log.is_open() )
     {
         this->m_file_log.close();
     }
     this->m_s_path = path;
+    return true;
 }
 
 bool DaemonLog::SetLogLevel( std::string conf )
