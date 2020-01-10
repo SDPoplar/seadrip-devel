@@ -18,8 +18,10 @@
     #define LIMIT_TEMPLATE( tpltype, basetype ) template<typename tpltype, typename std::enable_if <std::is_base_of<basetype, tpltype>::value, int>::type = 0 >
 #endif
 
-#define SDCORE_RET_FALSE( exp ) do { if( exp ) { return false; } } while( false )
-#define SDCORE_RET_FALSE_ERR( exp, code ) do { if( exp ) { this->Error( SD_RUNCODE( code ) ); return false; } } while( false )
+#define _SDCORE_RET_FALSE( exp, dosth ) do { if( exp ) { dosth return false; } } while( false )
+#define SDCORE_RET_FALSE( exp ) _SDCORE_RET_FALSE( exp, ; )
+#define SDCORE_RET_FALSE_ERR( exp, code ) _SDCORE_RET_FALSE( exp, this->Error( SD_RUNCODE( code ) ); )
+#define SDCORE_RET_FALSE_ERR_LOG( exp, code, log, log_level ) _SDCORE_RET_FALSE( exp, this->Error( SD_RUNCODE( code ) ); this->GetLog()->log_level( log ); )
 
 namespace SeaDrip
 {
@@ -134,7 +136,8 @@ namespace SeaDrip
                 }
             } );
             this->m_b_pid_saved = true;
-            return this->m_o_log.Init( this->m_o_conf );
+            SDCORE_RET_FALSE_ERR( !this->m_o_log.Init( this->m_o_conf ), EDaemonCoreRunCode::INIT_LOG_FAILED );
+            return true;
         }
 
         void Release() override
@@ -155,34 +158,21 @@ namespace SeaDrip
     protected:
         virtual bool ReadyToRun() override
         {
-            if( !DaemonCore<Conf>::ReadyToRun() )
-            {
-                this->GetLog()->Error( "Daemon init failed" );
-                return false;
-            }
+            SDCORE_RET_FALSE( !DaemonCore<Conf>::ReadyToRun() );
             int port = this->GetConfig()->GetListenPort();
-            if( !port )
-            {
-                this->GetLog()->Error( "No listen port setted" );
-                return false;
-            }
+            SDCORE_RET_FALSE_ERR_LOG( !port, ESocketDaemonCoreRunCode::NO_PORT_SETTED, "No listen port setted", Error );
             this->m_n_socket = socket( AF_INET, SOCK_STREAM, 0 );
             this->GetLog()->Debug( "Tcmd get socket: " + this->m_n_socket );
-            if( this->m_n_socket == -1 )
-            {
-                this->GetLog()->Error( "Socket create failed" );
-                return false;
-            }
+            SDCORE_RET_FALSE_ERR_LOG( this->m_n_socket == -1, ESocketDaemonCoreRunCode::CREATE_SOCK_FAILED, "Socket create failed", Error );
             struct sockaddr_in addr;
             addr.sin_family = AF_INET;
             addr.sin_addr.s_addr = htonl( this->m_o_conf.GetSockAddr() );
             addr.sin_port = htons( port );
-            if( bind( this->m_n_socket, &addr, sizeof( addr ) ) == -1 )
-            {
-                this->GetLog()->Error( "Bind domain failed, with port: " + port );
-                return -1;
-            }
-            return listen( this->m_n_socket, SI_QUEUE ) != -1;
+            SDCORE_RET_FALSE_ERR_LOG( bind( this->m_n_socket, &addr, sizeof( addr ) ) == -1, ESocketDaemonCoreRunCode::PORT_CONFLICT,
+                "Bind domain failed, with port: " + port, Error );
+            SDCORE_RET_FALSE_ERR_LOG( listen( this->m_n_socket, SI_QUEUE ) == -1, ESocketDaemonCoreRunCode::PORT_CONFLICT,
+                "Port conflict at: " + port, Error );
+            return true;
         }
 
         virtual void PreQuit() override

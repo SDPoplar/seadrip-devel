@@ -8,7 +8,7 @@
 #include <signal.h>
 #include <arpa/inet.h>
 #endif
-#include "DaemonLog.h"
+//  #include "DaemonLog.h"
 
 namespace SeaDrip
 {
@@ -72,7 +72,7 @@ namespace SeaDrip
         int GetExitSig( void ) const noexcept { return this->m_n_exit_sig.Get(); }
         std::string GetLogPath( void ) const noexcept { return this->m_s_log_path.Get(); }
         std::string GetLogLevel( void ) const noexcept { return this->m_s_log_level.Get(); }
-        const std::set<ELogLevel>& GetLogForceSave() const noexcept { return this->m_set_force_save; }
+        //  const std::set<ELogLevel>& GetLogForceSave() const noexcept { return this->m_set_force_save; }
 
     protected:
         virtual bool CfgFileOverride( std::string key, std::string val ) override;
@@ -82,7 +82,7 @@ namespace SeaDrip
         TConfigProperty<int> m_n_exit_sig;
         TConfigProperty<std::string> m_s_log_path;
         TConfigProperty<std::string> m_s_log_level;
-        std::set<ELogLevel> m_set_force_save;
+        //  std::set<ELogLevel> m_set_force_save;
     };
 
     class SocketDaemonConfig : public DaemonConfig
