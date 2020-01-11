@@ -59,7 +59,7 @@ namespace SeaDrip
 
     protected:
         SingletonCore() : m_b_run_switch( false ), m_n_runcode( SD_RUNCODE( ECoreRunCode::OK ) ) { g_p_core = static_cast<T *>( this ); }
-        SingletonCore( const SingletonCore& obj ) {}
+        SingletonCore( const SingletonCore& obj )  = delete;
         SingletonCore& operator = ( const SingletonCore& obj ) = delete;
         //  void Error( ECoreRunCode code ) { this->Error( SD_RUNCODE( code ) ); }
         void Error( int code ) { this->m_n_runcode = code; }
