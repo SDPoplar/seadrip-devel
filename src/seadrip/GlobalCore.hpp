@@ -11,6 +11,8 @@
 #include "RunCode.h"
 #include "DaemonLog.h"
 
+#include <iostream>
+
 #if defined( linux ) or defined( __GNUC__ )
     #define LIMIT_TEMPLATE( tpltype, basetype ) template<typename tpltype, typename std::enable_if<std::is_base_of<basetype, tpltype>{}, int>::type = 0>
 #else
@@ -152,16 +154,21 @@ namespace SeaDrip
     LIMIT_TEMPLATE( Conf, SeaDrip::SocketDaemonConfig )
     class SocketDaemonCore : public DaemonCore<Conf>
     {
-    public:
-        SocketDaemonCore() : DaemonCore<Conf>() {}
     protected:
+        SocketDaemonCore() : DaemonCore<Conf>(), m_n_socket( 0 ) {}
         virtual bool ReadyToRun() override
         {
+            std::cout << "SocketDaemonCore::ReadyToRun()" << std::endl;
             SDCORE_RET_FALSE( !DaemonCore<Conf>::ReadyToRun() );
+            std::cout << "DaemonCore::ReadyToRun success" << std::endl;
+
             int port = this->GetConfig()->GetListenPort();
+            std::cout << "Setting port" << std::endl;
             SDCORE_RET_FALSE_ERR_LOG( !port, ESocketDaemonCoreRunCode::NO_PORT_SETTED, "No listen port setted", Error );
             this->m_n_socket = socket( AF_INET, SOCK_STREAM, 0 );
-            this->GetLog()->Debug( "Tcmd get socket: " + this->m_n_socket );
+            if( this->GetLog()->Debug( "Tcmd get socket: " + this->m_n_socket ) ) {
+                std::cout << "Debug info write to log failed" << std::endl;
+            }
             SDCORE_RET_FALSE_ERR_LOG( this->m_n_socket == -1, ESocketDaemonCoreRunCode::CREATE_SOCK_FAILED, "Socket create failed", Error );
             struct sockaddr_in addr;
             addr.sin_family = AF_INET;
