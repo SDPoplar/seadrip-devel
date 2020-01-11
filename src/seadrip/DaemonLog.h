@@ -38,6 +38,7 @@ namespace SeaDrip
         bool InForceSave( ELogLevel level ) const noexcept;
         bool InUnsave( ELogLevel level ) const noexcept;
         bool LevelShouldSave( ELogLevel level ) const noexcept;
+        bool IsLogPathCanWrite( void ) const noexcept;
 
         std::string m_s_path;
         std::ofstream m_file_log;

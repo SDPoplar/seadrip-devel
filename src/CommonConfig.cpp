@@ -84,7 +84,7 @@ bool DaemonConfig::CfgFileOverride( std::string key, std::string val )
     }
     if( key == "log" )
     {
-        this->m_s_config_file.Set( EConfigSetFrom::CFGFILE, val );
+        this->m_s_log_path.Set( EConfigSetFrom::CFGFILE, val );
         return true;
     }
     if( key == "log_level" )

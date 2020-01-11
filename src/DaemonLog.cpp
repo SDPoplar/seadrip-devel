@@ -1,5 +1,7 @@
 #include "seadrip/DaemonLog.h"
 #include <map>
+#include <iostream>
+#include <unistd.h>
 using namespace SeaDrip;
 
 const std::map<std::string, ELogLevel> levelstrmap = {
@@ -33,7 +35,7 @@ bool DaemonLog::SetLogPath( std::string path )
         this->m_file_log.close();
     }
     this->m_s_path = path;
-    return true;
+    return this->IsLogPathCanWrite();
 }
 
 bool DaemonLog::SetLogLevel( std::string conf )
@@ -49,6 +51,7 @@ bool DaemonLog::SetLogLevel( std::string conf )
 bool DaemonLog::SetLogLevel( ELogLevel level, const std::set<ELogLevel> force,
     const std::set<ELogLevel> ignore )
 {
+    std::cout << "Setting log level to " << static_cast<int>( level ) << std::endl;
     this->m_e_log_level = level;
     if( !force.empty() )
     {
@@ -82,6 +85,12 @@ bool DaemonLog::LevelShouldSave( ELogLevel level ) const noexcept
         return false;
     }
     return static_cast<int>( level ) <= static_cast<int>( this->m_e_log_level );
+}
+
+bool DaemonLog::IsLogPathCanWrite( void ) const noexcept
+{
+    std::string path = this->m_s_path.substr( 0, this->m_s_path.find_last_of( '/' ) );
+    return !access( path.c_str(), F_OK | W_OK );
 }
 
 bool DaemonLog::Log( ELogLevel level, std::string content )

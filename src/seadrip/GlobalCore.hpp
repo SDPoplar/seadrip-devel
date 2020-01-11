@@ -11,7 +11,6 @@
 #include "RunCode.h"
 #include "DaemonLog.h"
 
-
 #if defined( linux ) or defined( __GNUC__ )
     #define LIMIT_TEMPLATE( tpltype, basetype ) template<typename tpltype, typename std::enable_if<std::is_base_of<basetype, tpltype>{}, int>::type = 0>
 #else
@@ -83,18 +82,17 @@ namespace SeaDrip
         friend SingletonCore<DaemonCore>;
     protected:
         DaemonCore() : SingletonCore<DaemonCore>(), m_o_conf(), m_b_run_switch( false ), m_b_pid_saved( false ) {}
-        bool SavePid( int pid = 0 )
+        int SavePid()
         {
-            std::string pidpath = this->m_o_conf.GetPidPath();
-            SDCORE_RET_FALSE_ERR( pidpath.empty(), EDaemonCoreRunCode::EMPTY_PID_PATH );
-            std::ofstream fpid( pidpath, std::ios::out );
-            SDCORE_RET_FALSE_ERR( !fpid, EDaemonCoreRunCode::PID_FILE_CANNOT_SAVE );
-            if( pid > 0 )
+            std::ofstream fpid( this->m_o_conf.GetPidPath(), std::ios::out );
+            if( !fpid )
             {
-                fpid << pid;
+                return 0;
             }
+            int pid = getpid();
+            fpid << pid;
             fpid.close();
-            return true;
+            return pid;
         }
 
     private:
@@ -118,15 +116,13 @@ namespace SeaDrip
         virtual bool ReadyToRun() override
         {
             SDCORE_RET_FALSE( !SingletonCore<DaemonCore<Conf>>::ReadyToRun() );
-            std::string pidpath = this->m_o_conf.GetPidPath();
-            int npid = getpid();
+            int npid = this->SavePid();
 
-            SDCORE_RET_FALSE( !this->SavePid() );            
-            SDCORE_RET_FALSE_ERR( daemon( 1, 1 ), EDaemonCoreRunCode::CREATE_DAEMON_FAILED );
+            SDCORE_RET_FALSE_ERR( !this->SavePid(), EDaemonCoreRunCode::PID_FILE_CANNOT_SAVE );
+            SDCORE_RET_FALSE_ERR( daemon( 1, 1 ) == -1, EDaemonCoreRunCode::CREATE_DAEMON_FAILED );
             
-            int dpid = getpid();
-            SDCORE_RET_FALSE( npid == dpid );
-            this->SavePid( dpid );
+            int dpid = this->SavePid();
+            //  SDCORE_RET_FALSE( npid == dpid );
             //  bind linux signals
             signal( this->m_o_conf.GetExitSig(), []( int sig )->void {
                 auto core = DaemonCore::Get();
@@ -136,8 +132,10 @@ namespace SeaDrip
                 }
             } );
             this->m_b_pid_saved = true;
+
             SDCORE_RET_FALSE_ERR( !this->m_o_log.SetLogPath( this->m_o_conf.GetLogPath() ), EDaemonCoreRunCode::SET_LOG_PATH_FAILED );
             SDCORE_RET_FALSE_ERR( !this->m_o_log.SetLogLevel( this->m_o_conf.GetLogLevel() ), EDaemonCoreRunCode::SET_LOG_LEVEL_FAILED );
+
             return true;
         }
 
