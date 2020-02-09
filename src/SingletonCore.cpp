@@ -1,4 +1,4 @@
-#include "seadrip/GlobalCore.h"
+#include "seadrip/SingletonCore.h"
 #include "seadrip/RunCode.h"
 using namespace SeaDrip;
 

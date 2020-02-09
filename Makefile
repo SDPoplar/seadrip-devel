@@ -10,10 +10,10 @@ build/common-config.o: src/CommonConfig.cpp src/seadrip/ConfigProperty.hpp
 build/ini-file-reader.o: src/IniReader.cpp src/seadrip/IniFileReader.h src/seadrip/KvFileReader.h
 	g++ -c -std=c++11 src/IniReader.cpp -lboost_regex -o build/ini-file-reader.o
 
-build/singleton-core.o: src/SingletonCore.cpp src/seadrip/GlobalCore.h
+build/singleton-core.o: src/SingletonCore.cpp src/seadrip/SingletonCore.h
 	g++ -c -std=c++11 src/SingletonCore.cpp -o build/singleton-core.o
 
-build/daemon-core.o: src/DaemonCore.cpp src/seadrip/GlobalCore.h
+build/daemon-core.o: src/DaemonCore.cpp src/seadrip/DaemonCore.hpp
 	g++ -c -std=c++11 src/DaemonCore.cpp -o build/deamon-core.o
 
 pre:

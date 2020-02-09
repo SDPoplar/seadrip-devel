@@ -1,2 +1,2 @@
-#include "seadrip/GlobalCore.h"
+#include "seadrip/DaemonCore.hpp"
 using namespace SeaDrip;
