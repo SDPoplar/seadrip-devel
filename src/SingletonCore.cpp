@@ -2,7 +2,7 @@
 #include "seadrip/RunCode.h"
 using namespace SeaDrip;
 
-SingletonCore::SingletonCore() : m_b_run_switch( false ), m_n_runcode( SD_RUNCODE( ECoreRunCode::OK ) )
+SingletonCore::SingletonCore() : m_b_run_switch( false ), m_n_runcode( CoreRunCode::OK )
 {}
 
 bool SingletonCore::IsRunning() const noexcept

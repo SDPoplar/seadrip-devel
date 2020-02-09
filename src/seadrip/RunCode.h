@@ -1,32 +1,35 @@
 #ifndef __SD_RUN_CODE_H__
 #define __SD_RUN_CODE_H__
 
+#define SDRUNCODE( name, val )  public: static const int name = val
+
 namespace SeaDrip
 {
-    enum class ECoreRunCode : int
+    class CoreRunCode
     {
-        OK = 0,
+        SDRUNCODE( OK, 0 );
     };
 
-    enum class EDaemonCoreRunCode : int
+    class DaemonCoreRunCode : public CoreRunCode
     {
-        EMPTY_PID_PATH = 1,
-        PID_FILE_CANNOT_SAVE = 2,
+        SDRUNCODE( EMPTY_PID_PATH, 1 );
+        SDRUNCODE( PID_FILE_CANNOT_SAVE, 2 );
 
-        CREATE_DAEMON_FAILED = 3,
-        SET_LOG_PATH_FAILED = 4,
-        SET_LOG_LEVEL_FAILED = 5,
+        SDRUNCODE( CREATE_DAEMON_FAILED, 3 );
+        SDRUNCODE( SET_LOG_PATH_FAILED, 4 );
+        SDRUNCODE( SET_LOG_LEVEL_FAILED, 5 );
     };
 
-    enum class ESocketDaemonCoreRunCode : int
+    class SocketDaemonCoreRunCode : public DaemonCoreRunCode
     {
-        CREATE_SOCK_FAILED = 10,
-        NO_PORT_SETTED = 11,
-        BIND_PORT_FAILED = 12,
-        PORT_CONFLICT = 13,
+        SDRUNCODE( CREATE_SOCK_FAILED, 10 );
+        SDRUNCODE( NO_PORT_SETTED, 11 );
+        SDRUNCODE( BIND_PORT_FAILED, 12 );
+        SDRUNCODE( PORT_CONFLICT, 13 );
     };
+
 };
 
-#define SD_RUNCODE( code ) static_cast<int>( code )
+#undef SDRUNCODE
 
 #endif
