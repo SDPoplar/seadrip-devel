@@ -5,16 +5,15 @@
 
 namespace SeaDrip
 {
-    class SingletonCore
+    class BaseCore
     {
-        AS_SD_SINGLETON;
-
         public:
             bool IsRunning() const noexcept;
             int Run();
             void Quit();
 
         protected:
+            BaseCore();
             void Error( int code );
 
             virtual bool ReadyToRun();
@@ -23,10 +22,18 @@ namespace SeaDrip
             virtual void PreQuit();
 
         private:
-            SingletonCore();
             bool m_b_run_switch;
             int m_n_runcode;
     };
+
+    class SingletonCore : public BaseCore
+    {
+        AS_SD_SINGLETON;
+
+    private:
+        SingletonCore();
+    };
+
 };
 
 #define _SDCORE_RET_FALSE( exp, dosth ) do { if( exp ) { dosth return false; } } while( false )

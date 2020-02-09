@@ -2,15 +2,15 @@
 #include "seadrip/RunCode.h"
 using namespace SeaDrip;
 
-SingletonCore::SingletonCore() : m_b_run_switch( false ), m_n_runcode( CoreRunCode::OK )
+BaseCore::BaseCore() : m_b_run_switch( false ), m_n_runcode( CoreRunCode::OK )
 {}
 
-bool SingletonCore::IsRunning() const noexcept
+bool BaseCore::IsRunning() const noexcept
 {
     return this->m_b_run_switch;
 }
 
-int SingletonCore::Run()
+int BaseCore::Run()
 {
     this->m_b_run_switch = this->ReadyToRun();
     while( this->m_b_run_switch )
@@ -21,22 +21,25 @@ int SingletonCore::Run()
     return this->m_n_runcode;
 }
 
-void SingletonCore::Quit()
+void BaseCore::Quit()
 {
     this->m_b_run_switch = false;
     this->PreQuit();
 }
 
-bool SingletonCore::ReadyToRun()
+bool BaseCore::ReadyToRun()
 {
     return true;
 }
 
-void SingletonCore::PreQuit()
+void BaseCore::PreQuit()
 {}
 
-void SingletonCore::Release()
+void BaseCore::Release()
 {}
 
-void SingletonCore::Tick()
+void BaseCore::Tick()
+{}
+
+SingletonCore::SingletonCore()
 {}

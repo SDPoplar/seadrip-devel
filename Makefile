@@ -1,5 +1,5 @@
-libseadrip: build/daemon-log.o build/common-config.o build/ini-file-reader.o build/singleton-core.o build/daemon-core.o
-	ar rcs lib/libseadrip.a build/daemon-log.o build/common-config.o build/ini-file-reader.o build/singleton-core.o build/deamon-core.o
+libseadrip: build/daemon-log.o build/common-config.o build/ini-file-reader.o build/singleton-core.o #build/daemon-core.o
+	ar rcs lib/libseadrip.a build/daemon-log.o build/common-config.o build/ini-file-reader.o build/singleton-core.o
 
 build/daemon-log.o: src/DaemonLog.cpp src/seadrip/DaemonLog.h
 	g++ -c -std=c++11 src/DaemonLog.cpp -o build/daemon-log.o
@@ -13,8 +13,8 @@ build/ini-file-reader.o: src/IniReader.cpp src/seadrip/IniFileReader.h src/seadr
 build/singleton-core.o: src/SingletonCore.cpp src/seadrip/SingletonCore.h
 	g++ -c -std=c++11 src/SingletonCore.cpp -o build/singleton-core.o
 
-build/daemon-core.o: src/DaemonCore.cpp src/seadrip/DaemonCore.hpp
-	g++ -c -std=c++11 src/DaemonCore.cpp -o build/deamon-core.o
+#build/daemon-core.o: src/DaemonCore.cpp src/seadrip/DaemonCore.hpp
+#	g++ -c -std=c++11 src/DaemonCore.cpp -o build/deamon-core.o
 
 pre:
 	chmod +x checkpath.sh
