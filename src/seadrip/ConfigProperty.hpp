@@ -16,9 +16,10 @@ namespace SeaDrip
     {
         NOTSET = 0,
         DEF = 1,
-        CFGFILE =  2,
-        SHELL = 3,
-        RUNTIME = 4
+        INHERIT = 2,
+        CFGFILE =  3,
+        SHELL = 4,
+        RUNTIME = 5
     };
 
     template <typename T> class TConfigProperty
@@ -77,7 +78,6 @@ namespace SeaDrip
     protected:
         virtual bool CfgFileOverride( std::string key, std::string val ) override;
 
-    private:
         TConfigProperty<std::string> m_s_pid_path;
         TConfigProperty<int> m_n_exit_sig;
         TConfigProperty<std::string> m_s_log_path;

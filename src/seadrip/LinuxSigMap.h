@@ -41,8 +41,8 @@ namespace SeaDrip
         std::make_pair( "SIGPOLL", SIGPOLL ),       //  SIGIO  Pollable event occurred (System V)
         std::make_pair( "SIGIO", SIGIO ),           //  29  I/O now possible (4.2 BSD)
         std::make_pair( "SIGPWR", SIGPWR ),         //  30  Power failure restart (System V)
-        std::make_pair( "SIGSYS", SIGSYS ),         //  31  Bad system call
-        std::make_pair( "SIGUNUSED", SIGUNUSED )    //  31
+        std::make_pair( "SIGSYS", SIGSYS )          //  31  Bad system call
+        //  std::make_pair( "SIGUNUSED", SIGUNUSED )    //  31
     };
 
     //  int TransLinuxSignal( std::string );
