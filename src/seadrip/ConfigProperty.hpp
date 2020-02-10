@@ -16,10 +16,9 @@ namespace SeaDrip
     {
         NOTSET = 0,
         DEF = 1,
-        INHERIT = 2,
-        CFGFILE =  3,
-        SHELL = 4,
-        RUNTIME = 5
+        CFGFILE =  2,
+        SHELL = 3,
+        RUNTIME = 4
     };
 
     template <typename T> class TConfigProperty
@@ -33,7 +32,7 @@ namespace SeaDrip
             virtual ~TConfigProperty() {}
             bool Set( EConfigSetFrom from, T val )
             {
-                bool canset = static_cast<int>( from ) > static_cast<int>( this->m_e_from );
+                bool canset = static_cast<int>( from ) >= static_cast<int>( this->m_e_from );
                 if( !canset )
                 {
                     return false;
