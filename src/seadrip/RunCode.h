@@ -18,6 +18,7 @@ namespace SeaDrip
         SDRUNCODE( CREATE_DAEMON_FAILED, 3 );
         SDRUNCODE( SET_LOG_PATH_FAILED, 4 );
         SDRUNCODE( SET_LOG_LEVEL_FAILED, 5 );
+        SDRUNCODE( NO_QUIT_METHOD_SETTED, 6 );
     };
 
     class SocketDaemonCoreRunCode : public DaemonCoreRunCode
