@@ -37,28 +37,22 @@ bool DaemonConfig::CfgFileOverride( std::string key, std::string val )
     return false;
 }
 
-//  =====================   SocketDaemonConfig  ============================================
-
-SocketDaemonConfig::SocketDaemonConfig( std::string def_cfg_path, int def_listen_port )
-    : DaemonConfig( def_cfg_path ), m_n_sock_addr( INADDR_ANY ), m_n_listen_port( def_listen_port )
-{}
-
-bool SocketDaemonConfig::CfgFileOverride( std::string key, std::string val )
+std::string DaemonConfig::GetPidPath( void ) const noexcept
 {
-    if( DaemonConfig::CfgFileOverride( key, val ) )
-    {
-        return true;
-    }
-    if( key == "sock_addr" )
-    {
-        //  translate val to in_addr_t
-        this->m_n_sock_addr.Set( EConfigSetFrom::CFGFILE, INADDR_ANY );
-        return true;
-    }
-    if( key == "listen" )
-    {
-        this->m_n_listen_port.Set( EConfigSetFrom::CFGFILE, atoi( val.c_str() ) );
-        return true;
-    }
-    return false;
+    return this->m_s_pid_path.Get();
+}
+
+int DaemonConfig::GetExitSig( void ) const noexcept
+{
+    return this->m_n_exit_sig.Get();
+}
+
+std::string DaemonConfig::GetLogPath( void ) const noexcept
+{
+    return this->m_s_log_path.Get();
+}
+
+std::string DaemonConfig::GetLogLevel( void ) const noexcept
+{
+    return this->m_s_log_level.Get();
 }
