@@ -27,6 +27,8 @@ namespace SeaDrip
         SDRUNCODE( NO_PORT_SETTED, 11 );
         SDRUNCODE( BIND_PORT_FAILED, 12 );
         SDRUNCODE( PORT_CONFLICT, 13 );
+        SDRUNCODE( FOCK_PROCESS_FAILED, 14 );
+        SDRUNCODE( EXEC_PROCESS_FAILED, 15 );
     };
 
 };
