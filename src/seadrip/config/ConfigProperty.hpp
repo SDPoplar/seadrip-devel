@@ -1,5 +1,5 @@
-#ifndef     __SD_CONFIG_PROPERTY_HPP__
-#define     __SD_CONFIG_PROPERTY_HPP__
+#ifndef     __SD_CONFIG_CONFIG_PROPERTY_HPP__
+#define     __SD_CONFIG_CONFIG_PROPERTY_HPP__
 
 #include <string>
 #include <map>
@@ -29,11 +29,11 @@ namespace SeaDrip
         public:
             TConfigProperty() : m_e_from( EConfigSetFrom::NOTSET ) {}
             TConfigProperty( T def ) : m_e_from( EConfigSetFrom::DEF ), m_o_val( def ) {}
-            virtual ~TConfigProperty() {}
+            TConfigProperty( const TConfigProperty &obj ) : m_e_from( obj.m_e_from ), m_o_val( obj.m_o_val ) {}
+            virtual ~TConfigProperty() = default;
             bool Set( EConfigSetFrom from, T val )
             {
-                bool canset = static_cast<int>( from ) >= static_cast<int>( this->m_e_from );
-                if( !canset )
+                if( static_cast<int>( from ) < static_cast<int>( this->m_e_from ) )
                 {
                     return false;
                 }
@@ -47,23 +47,10 @@ namespace SeaDrip
                 return this->m_o_val;
             }
 
+            virtual bool IsBoolProperty() const noexcept { return false; }
     };
 
-    class BaseConfig
-    {
-        public:
-            BaseConfig( std::string def_cfg_path = "" );
-            void Init( int argc, char** argv );
-
-        protected:
-            virtual void ShellOverride( char shell_flag, std::string val ) = 0;
-            virtual bool CfgFileOverride( std::string key, std::string val ) { return false; };
-
-            TConfigProperty<std::string> m_s_config_file;
-            std::string m_s_shell_options;
-            std::map<char, TConfigProperty<bool>*> m_map_bool_props;
-    };
-
+    template<> bool TConfigProperty<bool>::IsBoolProperty() const noexcept { return true; }
 };
 
 #endif
