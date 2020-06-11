@@ -33,6 +33,6 @@ namespace SeaDrip
 
 };
 
-#undef SDRUNCODE
+//  #undef SDRUNCODE
 
 #endif
