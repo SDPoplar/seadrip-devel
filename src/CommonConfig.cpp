@@ -1,5 +1,6 @@
 #include "seadrip/config/BaseConfig.h"
 #include "seadrip/shell/ShellInput.h"
+#include "seadrip/file/KvFileReader.h"
 using namespace SeaDrip;
 
 //  ==================  BaseConfig  ============================================
@@ -10,6 +11,15 @@ BaseConfig::BaseConfig( std::string def_cfg_path, int argc, char** argv ) : m_s_
     for( auto item : shell_catcher->Parse( argc, argv ) )
     {
         this->ShellOverride( item.first, item.second );
+    }
+    std::string cfg = this->m_s_config_file.Get(), key, val;
+    KvFileReader* cfgfile = cfg.empty() ? nullptr : new KvFileReader( cfg, '#' );
+    if( cfgfile && cfgfile->is_open() )
+    {
+        while( cfgfile->Next( key, val ) )
+        {
+            this->CfgFileOverride( key, val );
+        }
     }
 }
 

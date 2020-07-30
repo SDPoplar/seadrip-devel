@@ -1,8 +1,8 @@
 #libseadrip: build/daemon-log.o build/common-config.o build/ini-file-reader.o build/tick-core.o build/daemon-core.o build/daemon-config.o build/socket-daemon-config.o #build/singleton-core.o
 #	ar rcs lib/libseadrip.a build/daemon-log.o build/common-config.o build/ini-file-reader.o build/tick-core.o build/daemon-core.o build/daemon-config.o build/socket-daemon-config.o
 
-libseadrip: build/config/common-config.o build/config/daemon-config.o build/shell/shell-input.o
-	ar rcs lib/seadrip.a build/config/common-config.o build/config/daemon-config.o build/shell/shell-input.o
+libseadrip: build/config/common-config.o build/config/daemon-config.o build/shell/shell-input.o build/file/ini-file-reader.o
+	ar rcs lib/seadrip.a build/config/common-config.o build/config/daemon-config.o build/shell/shell-input.o build/file/ini-file-reader.o
 
 #build/daemon-log.o: src/DaemonLog.cpp src/seadrip/DaemonLog.h
 #	g++ -c -std=c++11 src/DaemonLog.cpp -o build/daemon-log.o
@@ -15,8 +15,8 @@ build/shell/shell-input.o: src/ShellInput.cpp src/seadrip/shell/ShellInput.h
 	mkdir -p build/shell
 	g++ -c -std=c++11 src/ShellInput.cpp -o build/shell/shell-input.o
 
-#build/ini-file-reader.o: src/IniReader.cpp src/seadrip/IniFileReader.h src/seadrip/KvFileReader.h
-#	g++ -c -std=c++11 src/IniReader.cpp -lboost_regex -o build/ini-file-reader.o
+build/file/ini-file-reader.o: src/IniReader.cpp src/seadrip/file/IniFileReader.h src/seadrip/file/KvFileReader.h
+	g++ -c -std=c++11 src/IniReader.cpp -lboost_regex -o build/file/ini-file-reader.o
 
 # build/tick-core.o: src/TickCore.cpp src/seadrip/TickCore.h
 #	g++ -c -std=c++11 src/TickCore.cpp -o build/tick-core.o
