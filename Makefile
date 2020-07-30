@@ -1,8 +1,8 @@
 #libseadrip: build/daemon-log.o build/common-config.o build/ini-file-reader.o build/tick-core.o build/daemon-core.o build/daemon-config.o build/socket-daemon-config.o #build/singleton-core.o
 #	ar rcs lib/libseadrip.a build/daemon-log.o build/common-config.o build/ini-file-reader.o build/tick-core.o build/daemon-core.o build/daemon-config.o build/socket-daemon-config.o
 
-libseadrip: build/config/common-config.o build/shell/shell-input.o
-	ar rcs lib/seadrip.a build/config/common-config.o build/shell/shell-input.o
+libseadrip: build/config/common-config.o build/config/daemon-config.o build/shell/shell-input.o
+	ar rcs lib/seadrip.a build/config/common-config.o build/config/daemon-config.o build/shell/shell-input.o
 
 #build/daemon-log.o: src/DaemonLog.cpp src/seadrip/DaemonLog.h
 #	g++ -c -std=c++11 src/DaemonLog.cpp -o build/daemon-log.o
@@ -27,8 +27,8 @@ build/shell/shell-input.o: src/ShellInput.cpp src/seadrip/shell/ShellInput.h
 #build/daemon-core.o: src/DaemonCore.cpp src/seadrip/DaemonCore.hpp
 #	g++ -c -std=c++11 src/DaemonCore.cpp -o build/daemon-core.o
 
-#build/daemon-config.o: src/DaemonConfig.cpp src/seadrip/DaemonConfig.h
-#	g++ -c -std=c++11 src/DaemonConfig.cpp -o build/daemon-config.o
+build/config/daemon-config.o: src/DaemonConfig.cpp src/seadrip/config/DaemonConfig.h
+	g++ -c -std=c++11 src/DaemonConfig.cpp -o build/config/daemon-config.o
 
 #build/socket-daemon-config.o: src/SocketDaemonConfig.cpp src/seadrip/SocketDaemonConfig.h
 #	g++ -c -std=c++11 src/SocketDaemonConfig.cpp -o build/socket-daemon-config.o

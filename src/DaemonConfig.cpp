@@ -1,21 +1,31 @@
-#include "seadrip/DaemonConfig.h"
+#include "seadrip/config/DaemonConfig.h"
 #include "seadrip/LinuxSigMap.h"
 #include <boost/algorithm/string.hpp>
 using namespace SeaDrip;
 
 //  ================    DaemonConfig    =================================================
 
-DaemonConfig::DaemonConfig( std::string def_cfg_path ) : BaseConfig( def_cfg_path ),
+DaemonConfig::DaemonConfig( std::string def_cfg_path, int argc, char** argv ) : BaseConfig( def_cfg_path, argc, argv ),
     m_s_pid_path( "" ), m_n_exit_sig( SIGUSR2 ), m_s_log_path( "" ), m_s_log_level( "error" )
 {}
 
+ShellInput* DaemonConfig::RegistShellItem( ShellInput* catcher )
+{
+    return BaseConfig::RegistShellItem( catcher );
+}
+
+bool DaemonConfig::ShellOverride( std::string key, std::string val )
+{
+    return BaseConfig::ShellOverride( key, val );
+}
+
 bool DaemonConfig::CfgFileOverride( std::string key, std::string val )
 {
-    if( key == "pid" )
+    if( BaseConfig::CfgFileOverride( key, val ) )
     {
-        this->m_s_pid_path.Set( EConfigSetFrom::CFGFILE, val );
         return true;
     }
+    CONFIG_OVERRIDE_FROM_CFGFILE( "pid", this->m_s_pid_path );
     if( key == "exit_sig" )
     {
         std::string upperval = boost::to_upper_copy( val );
@@ -24,16 +34,8 @@ bool DaemonConfig::CfgFileOverride( std::string key, std::string val )
         this->m_n_exit_sig.Set( EConfigSetFrom::CFGFILE, nsig );
         return true;
     }
-    if( key == "log" )
-    {
-        this->m_s_log_path.Set( EConfigSetFrom::CFGFILE, val );
-        return true;
-    }
-    if( key == "log_level" )
-    {
-        this->m_s_log_level.Set( EConfigSetFrom::CFGFILE, val );
-        return true;
-    }
+    CONFIG_OVERRIDE_FROM_CFGFILE( "log", this->m_s_log_path );
+    CONFIG_OVERRIDE_FROM_CFGFILE( "log_level", this->m_s_log_level );
     return false;
 }
 
