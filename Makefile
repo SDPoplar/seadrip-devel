@@ -1,5 +1,5 @@
 libseadrip: build/config/common-config.o build/config/daemon-config.o build/shell/shell-input.o build/shell/daemon-util.o build/file/ini-file-reader.o
-	ar rcs lib/seadrip.a build/config/common-config.o build/config/daemon-config.o build/shell/shell-input.o build/shell/daemon-util.o build/file/ini-file-reader.o
+	ar rcs lib/libseadrip.a build/config/common-config.o build/config/daemon-config.o build/shell/shell-input.o build/shell/daemon-util.o build/file/ini-file-reader.o
 
 #build/daemon-log.o: src/DaemonLog.cpp src/seadrip/DaemonLog.h
 #	g++ -c -std=c++11 src/DaemonLog.cpp -o build/daemon-log.o
@@ -19,6 +19,7 @@ build/shell/daemon-util.o: src/DaemonUtil.cpp src/seadrip/shell/Daemon.h
 	g++ -c -std=c++11 src/DaemonUtil.cpp -o build/shell/daemon-util.o
 
 build/file/ini-file-reader.o: src/IniReader.cpp src/seadrip/file/IniFileReader.h src/seadrip/file/KvFileReader.h
+	mkdir -p build/file
 	g++ -c -std=c++11 src/IniReader.cpp -lboost_regex -o build/file/ini-file-reader.o
 
 # build/tick-core.o: src/TickCore.cpp src/seadrip/TickCore.h
