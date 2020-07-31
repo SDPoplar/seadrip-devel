@@ -50,7 +50,7 @@ namespace SeaDrip
             virtual bool IsBoolProperty() const noexcept { return false; }
     };
 
-    template<> bool TConfigProperty<bool>::IsBoolProperty() const noexcept { return true; }
+    template<> inline bool TConfigProperty<bool>::IsBoolProperty() const noexcept { return true; }
 };
 
 #endif

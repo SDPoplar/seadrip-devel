@@ -39,3 +39,8 @@ bool BaseConfig::CfgFileOverride( std::string key, std::string val )
 {
     return false;
 }
+
+bool BaseConfig::Valid( void ) const noexcept
+{
+    return !this->m_s_config_file.Get().empty();
+}

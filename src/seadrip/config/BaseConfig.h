@@ -26,7 +26,7 @@ namespace SeaDrip
     {
         public:
             BaseConfig( std::string def_cfg_path, int argc, char** argv );
-            virtual bool Valid( void ) noexcept;
+            virtual bool Valid( void ) const noexcept;
 
         protected:
             virtual class ShellInput* RegistShellItem( class ShellInput* catcher );
