@@ -9,22 +9,21 @@ namespace SeaDrip
     class DaemonConfig : public BaseConfig
     {
     public:
-        DaemonConfig( std::string def_cfg_path );
-        std::string GetPidPath( void ) const noexcept;
-        int GetExitSig( void ) const noexcept;
-        std::string GetLogPath( void ) const noexcept;
-        std::string GetLogLevel( void ) const noexcept;
+        DaemonConfig( const std::string& def_cfg_path, const std::string& def_pid_path );
+        const std::string GetPidPath( void ) const noexcept;
+        DaemonConfig& SetPidPath( const std::string& pid_path, EConfigSetFrom from = EConfigSetFrom::RUNTIME );
+        const int GetExitSig( void ) const noexcept;
+        DaemonConfig& SetExitSig( const int sig, EConfigSetFrom from = EConfigSetFrom::RUNTIME );
+
+        //  std::string GetLogPath( void ) const noexcept;
+        //  std::string GetLogLevel( void ) const noexcept;
         //  const std::set<ELogLevel>& GetLogForceSave() const noexcept { return this->m_set_force_save; }
 
     protected:
-        virtual ShellInput* RegistShellItem( ShellInput* catcher ) override;
-        virtual bool ShellOverride( std::string key, std::string val ) override;
-        virtual bool CfgFileOverride( std::string key, std::string val ) override;
-
         TConfigProperty<std::string> m_s_pid_path;
         TConfigProperty<int> m_n_exit_sig;
-        TConfigProperty<std::string> m_s_log_path;
-        TConfigProperty<std::string> m_s_log_level;
+        //  TConfigProperty<std::string> m_s_log_path;
+        //  TConfigProperty<std::string> m_s_log_level;
         //  std::set<ELogLevel> m_set_force_save;
     };
 };
