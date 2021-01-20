@@ -47,6 +47,19 @@ namespace SeaDrip
                 return this->m_o_val;
             }
 
+            /*
+            T operator= () const
+            {
+                return this->Get();
+            }
+            */
+
+            TConfigProperty &operator= ( const T& val )
+            {
+                this->Set( EConfigSetFrom::RUNTIME, val );
+                return *this;
+            }
+
             virtual bool IsBoolProperty() const noexcept { return false; }
     };
 

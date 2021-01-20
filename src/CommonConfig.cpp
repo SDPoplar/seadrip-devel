@@ -5,7 +5,10 @@ using namespace SeaDrip;
 
 //  ==================  BaseConfig  ============================================
 
-BaseConfig::BaseConfig( std::string def_cfg_path, int argc, char** argv ) : m_s_config_file( def_cfg_path )
+BaseConfig::BaseConfig( std::string def_cfg_path ) : m_s_config_file( def_cfg_path )
+{}
+
+int BaseConfig::Merge( int argc, char** argv )
 {
     auto shell_catcher = this->RegistShellItem( new ShellInput() );
     for( auto item : shell_catcher->Parse( argc, argv ) )
@@ -14,13 +17,15 @@ BaseConfig::BaseConfig( std::string def_cfg_path, int argc, char** argv ) : m_s_
     }
     std::string cfg = this->m_s_config_file.Get(), key, val;
     KvFileReader* cfgfile = cfg.empty() ? nullptr : new KvFileReader( cfg, '#' );
-    if( cfgfile && cfgfile->is_open() )
+    if( !cfgfile || !cfgfile->is_open() )
     {
-        while( cfgfile->Next( key, val ) )
-        {
-            this->CfgFileOverride( key, val );
-        }
+        return 1;
     }
+    while( cfgfile->Next( key, val ) )
+    {
+        this->CfgFileOverride( key, val );
+    }
+    return 0;
 }
 
 ShellInput* BaseConfig::RegistShellItem( ShellInput* catcher )

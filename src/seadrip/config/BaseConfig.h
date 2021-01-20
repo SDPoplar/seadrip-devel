@@ -25,7 +25,8 @@ namespace SeaDrip
     class BaseConfig
     {
         public:
-            BaseConfig( std::string def_cfg_path, int argc, char** argv );
+            BaseConfig( std::string def_cfg_path );
+            int Merge( int argc, char** argv );
             virtual bool Valid( void ) const noexcept;
 
         protected:

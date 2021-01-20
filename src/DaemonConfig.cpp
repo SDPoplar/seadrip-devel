@@ -5,7 +5,7 @@ using namespace SeaDrip;
 
 //  ================    DaemonConfig    =================================================
 
-DaemonConfig::DaemonConfig( std::string def_cfg_path, int argc, char** argv ) : BaseConfig( def_cfg_path, argc, argv ),
+DaemonConfig::DaemonConfig( std::string def_cfg_path ) : BaseConfig( def_cfg_path ),
     m_s_pid_path( "" ), m_n_exit_sig( SIGUSR2 ), m_s_log_path( "" ), m_s_log_level( "error" )
 {}
 

@@ -9,7 +9,7 @@ namespace SeaDrip
     class DaemonConfig : public BaseConfig
     {
     public:
-        DaemonConfig( std::string def_cfg_path, int argc, char** argv );
+        DaemonConfig( std::string def_cfg_path );
         std::string GetPidPath( void ) const noexcept;
         int GetExitSig( void ) const noexcept;
         std::string GetLogPath( void ) const noexcept;
