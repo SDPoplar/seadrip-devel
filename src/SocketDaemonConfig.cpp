@@ -1,47 +1,35 @@
-#include "seadrip/SocketDaemonConfig.h"
+#include "seadrip/config/SocketDaemonConfig.h"
 using namespace SeaDrip;
+
+//  ========================    SocketConfig    ============================================
+SocketConfig::SocketConfig( int port, std::string addr )
+    : m_s_listen_addr( addr ), m_n_listen_port( port )
+{}
+
+const int SocketConfig::GetListenPort() const noexcept
+{
+    return this->m_n_listen_port.Get();
+}
+
+SocketConfig &SocketConfig::SetListenPort( int port, EConfigSetFrom from )
+{
+    this->m_n_listen_port.Set( from, port );
+    return *this;
+}
+
+const std::string SocketConfig::GetListenAddr( void ) const noexcept
+{
+    return this->m_s_listen_addr.Get();
+}
+
+SocketConfig &SocketConfig::SetListenAddr( const std::string &listen_addr, EConfigSetFrom from )
+{
+    this->m_s_listen_addr.Set( from, listen_addr );
+    return *this;
+}
 
 //  =====================   SocketDaemonConfig  ============================================
 
-SocketDaemonConfig::SocketDaemonConfig( std::string def_cfg_path, unsigned int def_listen_port )
-    : DaemonConfig( def_cfg_path ), /*m_n_sock_addr( INADDR_ANY ),*/ m_u_listen_port( def_listen_port )
+SocketDaemonConfig::SocketDaemonConfig( std::string def_cfg_path, std::string def_pid_path, int def_listen_port, std::string def_listen_addr )
+    : DaemonConfig( def_cfg_path, def_pid_path ), SocketConfig( def_listen_port, def_listen_addr )
 {}
-
-bool SocketDaemonConfig::CfgFileOverride( std::string key, std::string val )
-{
-    if( DaemonConfig::CfgFileOverride( key, val ) )
-    {
-        return true;
-    }
-    /*
-    if( key == "sock_addr" )
-    {
-        //  translate val to in_addr_t
-        this->m_n_sock_addr.Set( EConfigSetFrom::CFGFILE, INADDR_ANY );
-        return true;
-    }
-    */
-    if( key == "listen" )
-    {
-        this->m_u_listen_port.Set( EConfigSetFrom::CFGFILE, atoi( val.c_str() ) );
-        return true;
-    }
-    return false;
-}
-
-unsigned int SocketDaemonConfig::GetListenPort() const noexcept
-{
-    return this->m_u_listen_port.Get();
-}
-
-unsigned int SocketDaemonConfig::GetProcessNum() const noexcept
-{
-    return this->m_u_process_num.Get();
-}
-
-/*
-in_addr_t SocketDaemonConfig::GetSockAddr() const noexcept
-{
-    return this->m_n_sock_addr.Get();
-}
-*/

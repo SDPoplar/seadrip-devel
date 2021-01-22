@@ -1,4 +1,4 @@
-libseadrip: build/config/common-config.o build/config/daemon-config.o build/shell/shell-input.o build/shell/daemon-util.o build/file/ini-file-reader.o
+libseadrip: build/config/common-config.o build/config/socket-daemon-config.o build/config/daemon-config.o build/shell/shell-input.o build/shell/daemon-util.o build/file/ini-file-reader.o
 	ar rcs lib/libseadrip.a build/config/common-config.o build/config/daemon-config.o build/shell/shell-input.o build/shell/daemon-util.o build/file/ini-file-reader.o
 
 #build/daemon-log.o: src/DaemonLog.cpp src/seadrip/DaemonLog.h
@@ -31,8 +31,8 @@ build/file/ini-file-reader.o: src/IniReader.cpp src/seadrip/file/IniFileReader.h
 #build/daemon-core.o: src/DaemonCore.cpp src/seadrip/DaemonCore.hpp
 #	g++ -c -std=c++11 src/DaemonCore.cpp -o build/daemon-core.o
 
-#build/socket-daemon-config.o: src/SocketDaemonConfig.cpp src/seadrip/SocketDaemonConfig.h
-#	g++ -c -std=c++11 src/SocketDaemonConfig.cpp -o build/socket-daemon-config.o
+build/config/socket-daemon-config.o: src/SocketDaemonConfig.cpp src/seadrip/config/SocketDaemonConfig.h
+	g++ -c -std=c++11 src/SocketDaemonConfig.cpp -o build/config/socket-daemon-config.o
 
 pre:
 	chmod +x checkpath.sh
