@@ -9,7 +9,8 @@ using namespace SeaDrip;
 //  =================== IniFileReader   =======================================
 
 IniFileReader::IniFileReader( std::string file_path, char note_flag )
-    : std::ifstream( file_path, std::ios::in ), m_c_note_flag( note_flag )
+    : std::ifstream( file_path, std::ios::in ), m_c_note_flag( note_flag ),
+    m_u_line_index( 0 )
 {}
 
 IniFileReader::~IniFileReader()
@@ -20,7 +21,7 @@ IniFileReader::~IniFileReader()
     }
 }
 
-bool IniFileReader::TryGetLine( std::string& out )
+const bool IniFileReader::TryGetLine( std::string& out )
 {
     if( this->eof() )
     {
@@ -29,10 +30,16 @@ bool IniFileReader::TryGetLine( std::string& out )
     char line[ MAX_LINE_LEN ];
     this->getline( line, MAX_LINE_LEN );
     out = line;
+    this->m_u_line_index++;
     return true;
 }
 
-bool IniFileReader::NextLine( std::string& valid_line )
+const unsigned int IniFileReader::GetLineIndex( void ) const noexcept
+{
+    return this->m_u_line_index;
+}
+
+const bool IniFileReader::NextLine( std::string& valid_line )
 {
     std::string line;
     while( this->TryGetLine( line ) )
@@ -56,11 +63,11 @@ bool IniFileReader::NextLine( std::string& valid_line )
 
 //  =====================   KvFileReader    =========================================
 
-KvFileReader::KvFileReader( std::string file_path, char note_flag ) : IniFileReader( file_path, note_flag ),
-    m_regex_pattern( "([^=]+)=\\s*([^\\s]+)" ), m_s_last_key( "" ), m_s_last_val( "" )
+KvFileReader::KvFileReader( std::string file_path, char note_flag )
+    : IniFileReader( file_path, note_flag ), m_s_last_key( "" ), m_s_last_val( "" )
 {}
 
-bool KvFileReader::Next( std::string& key, std::string& val )
+const bool KvFileReader::Next( std::string& key, std::string& val )
 {
     if( this->NextLine() )
     {
@@ -73,14 +80,8 @@ bool KvFileReader::Next( std::string& key, std::string& val )
 
 bool KvFileReader::ParseLine( std::string line )
 {
-    boost::smatch matches;
-    if( !boost::regex_search( line, matches, this->m_regex_pattern ) || (matches.size() < 3) )
-    {
-        return false;
-    }
-    std::string _key = matches[ 1 ];
-    this->m_s_last_key = boost::trim_copy( _key );
-    std::string _val = matches[ 2 ];
-    this->m_s_last_val = boost::trim_copy( _val );
+    auto pos = line.find_first_of( '=' );
+    this->m_s_last_key = boost::trim_copy( line.substr( 0, pos ) );
+    this->m_s_last_val = boost::trim_copy( line.substr( pos + 1 ) );
     return true;
 }

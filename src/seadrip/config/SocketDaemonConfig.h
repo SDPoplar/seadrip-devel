@@ -14,10 +14,13 @@ namespace SeaDrip
         SocketConfig &SetListenAddr( const std::string& addr, EConfigSetFrom from = EConfigSetFrom::RUNTIME );
         const int GetListenPort( void ) const noexcept;
         SocketConfig &SetListenPort( const int port, EConfigSetFrom from = EConfigSetFrom::RUNTIME );
+        const int GetWorkProcessNum( void ) const noexcept;
+        SocketConfig &SetWorkProcessNum( const int num, EConfigSetFrom from  = EConfigSetFrom::RUNTIME );
     
     protected:
         SeaDrip::TConfigProperty<std::string> m_s_listen_addr;
         SeaDrip::TConfigProperty<int> m_n_listen_port;
+        SeaDrip::TConfigProperty<int> m_n_work_process_num;
     };
 
     class SocketDaemonConfig : public DaemonConfig, public SocketConfig
@@ -28,6 +31,7 @@ namespace SeaDrip
     protected:
         virtual const std::string GetShellOptions( void ) override;
         virtual const bool SetShellOption( const char item, const char* val ) override;
+        virtual const bool SetConfigOption( const std::string key, const std::string value ) override;
     };
 }
 

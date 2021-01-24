@@ -2,15 +2,28 @@
 #define     __SD_CONFIG_BASE_CONFIG_H__
 
 #include "ConfigProperty.hpp"
+#include "../file/KvFileReader.h"
 
 namespace SeaDrip
 {
-    typedef struct
+    class InvalidShellOption
     {
+    public:
+        InvalidShellOption( const bool stop_if_invalid = true );
         bool stopIfInvalid;
         char optionItem;
         std::string invalidValue;
-    } InvalidShellOption;
+    };
+
+    class InvalidConfigOption
+    {
+    public:
+        InvalidConfigOption( const bool stop_if_invalid = true );
+        bool stopIfInvalid;
+        std::string configItem;
+        std::string invalidValue;
+        unsigned int optionAtLine;
+    };
 
     class BaseConfig
     {
@@ -22,9 +35,12 @@ namespace SeaDrip
             BaseConfig& SetDebug( const bool flag = true, EConfigSetFrom from = EConfigSetFrom::RUNTIME );
 
         protected:
-            bool InitWithShell( int argc, char** argv, InvalidShellOption& = *((InvalidShellOption*)nullptr) );
+            const bool InitWithShell( int argc, char** argv, InvalidShellOption& = *((InvalidShellOption*)nullptr) );
             virtual const std::string GetShellOptions( void );
             virtual const bool SetShellOption( const char, const char* );
+
+            const bool InitWithIniReader( SeaDrip::KvFileReader& ini, InvalidConfigOption& = *((InvalidConfigOption*)nullptr) );
+            virtual const bool SetConfigOption( const std::string key, const std::string value );
 
             TConfigProperty<std::string> m_s_config_file;
             TConfigProperty<bool> m_b_debug;

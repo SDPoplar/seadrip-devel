@@ -3,7 +3,7 @@ using namespace SeaDrip;
 
 //  ========================    SocketConfig    ============================================
 SocketConfig::SocketConfig( int port, std::string addr )
-    : m_s_listen_addr( addr ), m_n_listen_port( port )
+    : m_s_listen_addr( addr ), m_n_listen_port( port ), m_n_work_process_num( 1 )
 {}
 
 const int SocketConfig::GetListenPort() const noexcept
@@ -25,6 +25,17 @@ const std::string SocketConfig::GetListenAddr( void ) const noexcept
 SocketConfig &SocketConfig::SetListenAddr( const std::string &listen_addr, EConfigSetFrom from )
 {
     this->m_s_listen_addr.Set( from, listen_addr );
+    return *this;
+}
+
+const int SocketConfig::GetWorkProcessNum( void ) const noexcept
+{
+    return this->m_n_work_process_num.Get();
+}
+
+SocketConfig &SocketConfig::SetWorkProcessNum( const int num, EConfigSetFrom from )
+{
+    this->m_n_work_process_num.Set( from, num );
     return *this;
 }
 
@@ -52,4 +63,24 @@ const bool SocketDaemonConfig::SetShellOption( const char item, const char* val 
         default:
             return DaemonConfig::SetShellOption( item, val );
     }
+}
+
+const bool SocketDaemonConfig::SetConfigOption( const std::string key, const std::string value )
+{
+    if( key == "listen_addr" )
+    {
+        this->SetListenAddr( value, EConfigSetFrom::CFGFILE );
+        return true;
+    }
+    if( key == "listen_port" )
+    {
+        this->SetListenPort( atoi( value.c_str() ), EConfigSetFrom::CFGFILE );
+        return true;
+    }
+    if( key == "work_process_num" )
+    {
+        this->SetWorkProcessNum( atoi( value.c_str() ), EConfigSetFrom::CFGFILE );
+        return true;
+    }
+    return DaemonConfig::SetConfigOption( key, value );
 }
