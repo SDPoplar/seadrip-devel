@@ -24,6 +24,10 @@ namespace SeaDrip
     {
     public:
         SocketDaemonConfig( std::string def_cfg_path, std::string def_pid_path, int def_port, std::string addr = "" );
+
+    protected:
+        virtual const std::string GetShellOptions( void ) override;
+        virtual const bool SetShellOption( const char item, const char* val ) override;
     };
 }
 

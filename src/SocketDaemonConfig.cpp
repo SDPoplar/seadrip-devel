@@ -33,3 +33,23 @@ SocketConfig &SocketConfig::SetListenAddr( const std::string &listen_addr, EConf
 SocketDaemonConfig::SocketDaemonConfig( std::string def_cfg_path, std::string def_pid_path, int def_listen_port, std::string def_listen_addr )
     : DaemonConfig( def_cfg_path, def_pid_path ), SocketConfig( def_listen_port, def_listen_addr )
 {}
+
+const std::string SocketDaemonConfig::GetShellOptions( void )
+{
+    return std::string( DaemonConfig::GetShellOptions() ).append( "h:p:" );
+}
+
+const bool SocketDaemonConfig::SetShellOption( const char item, const char* val )
+{
+    switch( item )
+    {
+        case 'h':
+            this->SetListenAddr( val,  EConfigSetFrom::SHELL );
+            return true;
+        case 'p':
+            this->SetListenPort( atoi( val ), EConfigSetFrom::SHELL );
+            return true;
+        default:
+            return DaemonConfig::SetShellOption( item, val );
+    }
+}

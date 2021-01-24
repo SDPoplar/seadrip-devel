@@ -1,5 +1,5 @@
 libseadrip: build/config/common-config.o build/config/socket-daemon-config.o build/config/daemon-config.o build/shell/shell-input.o build/shell/daemon-util.o build/file/ini-file-reader.o
-	ar rcs lib/libseadrip.a build/config/common-config.o build/config/daemon-config.o build/shell/shell-input.o build/shell/daemon-util.o build/file/ini-file-reader.o
+	ar rcs lib/libseadrip.a build/config/common-config.o build/config/socket-daemon-config.o build/config/daemon-config.o build/shell/shell-input.o build/shell/daemon-util.o build/file/ini-file-reader.o
 
 #build/daemon-log.o: src/DaemonLog.cpp src/seadrip/DaemonLog.h
 #	g++ -c -std=c++11 src/DaemonLog.cpp -o build/daemon-log.o

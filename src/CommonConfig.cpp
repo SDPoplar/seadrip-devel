@@ -30,3 +30,42 @@ BaseConfig& BaseConfig::SetDebug( const bool flag, EConfigSetFrom from )
     this->m_b_debug.Set( from, flag );
     return *this;
 }
+
+bool BaseConfig::InitWithShell( int argc, char** argv, InvalidShellOption& eholder )
+{
+    char opt;
+    while( ( opt = getopt( argc, argv, this->GetShellOptions().c_str() ) ) != -1 )
+    {
+        if( this->SetShellOption( opt, optarg ) )
+        {
+            continue;
+        }
+        if( &eholder && eholder.stopIfInvalid )
+        {
+            eholder.optionItem = opt;
+            eholder.invalidValue = optarg;
+            return false;
+        }
+    }
+    return true;
+}
+
+const std::string BaseConfig::GetShellOptions( void )
+{
+    return "dc:";
+}
+
+const bool BaseConfig::SetShellOption( const char item, const char* val )
+{
+    switch( item )
+    {
+        case 'd':
+            this->SetDebug();
+            return true;
+        case 'c':
+            this->SetConfigPath( val, EConfigSetFrom::SHELL );
+            return true;
+        default:
+            return false;
+    }
+}
