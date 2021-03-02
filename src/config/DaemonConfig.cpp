@@ -31,6 +31,7 @@ DaemonConfig& DaemonConfig::SetExitSig( const int sig, EConfigSetFrom from )
     this->m_n_exit_sig.Set( from, sig );
     return *this;
 }
+
 /*
 std::string DaemonConfig::GetLogPath( void ) const noexcept
 {

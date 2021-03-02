@@ -14,6 +14,8 @@ namespace SeaDrip
         const int GetExitSig( void ) const noexcept;
         DaemonConfig& SetExitSig( const int sig, EConfigSetFrom from = EConfigSetFrom::RUNTIME );
 
+        //  virtual const std::string GetShellOptions( void ) override;
+
         //  std::string GetLogPath( void ) const noexcept;
         //  std::string GetLogLevel( void ) const noexcept;
         //  const std::set<ELogLevel>& GetLogForceSave() const noexcept { return this->m_set_force_save; }
