@@ -31,7 +31,7 @@ namespace SeaDrip
             TConfigProperty( T def ) : m_e_from( EConfigSetFrom::DEF ), m_o_val( def ) {}
             TConfigProperty( const TConfigProperty &obj ) : m_e_from( obj.m_e_from ), m_o_val( obj.m_o_val ) {}
             virtual ~TConfigProperty() = default;
-            bool Set( EConfigSetFrom from, T val )
+            bool Set( const EConfigSetFrom from, const T val )
             {
                 if( static_cast<int>( from ) < static_cast<int>( this->m_e_from ) )
                 {
@@ -42,7 +42,7 @@ namespace SeaDrip
                 return true;
             }
 
-            T Get() const
+            const T Get() const
             {
                 return this->m_o_val;
             }

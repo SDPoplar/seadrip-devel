@@ -1,12 +1,11 @@
-#ifndef __SD_DAEMON_CONFIG_H__
-#define __SD_DAEMON_CONFIG_H__
+#ifndef __SD_CONF_ATOM_DAEMON_H__
+#define __SD_CONF_ATOM_DAEMON_H__
 
-//  #include "ConfigProperty.hpp"
-#include "BaseConfig.h"
+#include "../base/ConfigProperty.hpp"
 
 namespace SeaDrip
 {
-    class DaemonConfig : public BaseConfig
+    class DaemonConfig
     {
     public:
         DaemonConfig( const std::string& def_cfg_path, const std::string& def_pid_path );

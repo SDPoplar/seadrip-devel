@@ -11,12 +11,9 @@ namespace SeaDrip
             BaseConfig( const std::string& def_cfg_path );
             const std::string GetConfigPath() const noexcept;
             BaseConfig& SetConfigPath( const std::string& cfg_path, EConfigSetFrom from = EConfigSetFrom::RUNTIME );
-            const bool IsDebug( void ) const noexcept;
-            BaseConfig& SetDebug( const bool flag = true, EConfigSetFrom from = EConfigSetFrom::RUNTIME );
 
         protected:
             TConfigProperty<std::string> m_s_config_file;
-            TConfigProperty<bool> m_b_debug;
     };
 };
 

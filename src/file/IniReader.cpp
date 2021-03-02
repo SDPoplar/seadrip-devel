@@ -1,4 +1,4 @@
-#include "seadrip/file/KvFileReader.h"
+#include "../seadrip/file/KvFileReader.h"
 #include <boost/algorithm/string.hpp>
 using namespace SeaDrip;
 
