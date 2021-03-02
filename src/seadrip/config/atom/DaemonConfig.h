@@ -8,7 +8,7 @@ namespace SeaDrip
     class DaemonConfig
     {
     public:
-        DaemonConfig( const std::string& def_cfg_path, const std::string& def_pid_path );
+        DaemonConfig( const std::string& def_pid_path );
         const std::string GetPidPath( void ) const noexcept;
         DaemonConfig& SetPidPath( const std::string& pid_path, EConfigSetFrom from = EConfigSetFrom::RUNTIME );
         const int GetExitSig( void ) const noexcept;

@@ -1,4 +1,5 @@
 #include "../seadrip/config/base/BaseConfig.h"
+#include "../seadrip/file/KvFileReader.h"
 //  #include "seadrip/shell/ShellInput.h"
 //  #include "seadrip/file/IniFileReader.h"
 #include <boost/algorithm/string/case_conv.hpp>

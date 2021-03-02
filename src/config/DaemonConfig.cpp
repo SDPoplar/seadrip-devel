@@ -1,13 +1,11 @@
-#include "seadrip/config/DaemonConfig.h"
+#include "../seadrip/config/atom/DaemonConfig.h"
 #include "seadrip/LinuxSigMap.h"
 #include <boost/algorithm/string.hpp>
 using namespace SeaDrip;
 
 //  ================    DaemonConfig    =================================================
 
-DaemonConfig::DaemonConfig( const std::string& def_cfg_path, const std::string& def_pid_path )
-    : BaseConfig( def_cfg_path ), m_s_pid_path( def_pid_path ), m_n_exit_sig( SIGUSR2 )
-    //  m_s_log_path( "" ), m_s_log_level( "error" )
+DaemonConfig::DaemonConfig( const std::string& def_pid_path ) : m_s_pid_path( def_pid_path ), m_n_exit_sig( SIGUSR2 )
 {}
 
 const std::string DaemonConfig::GetPidPath( void ) const noexcept

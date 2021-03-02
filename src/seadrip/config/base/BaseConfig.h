@@ -2,10 +2,12 @@
 #define     __SD_CONFIG_BASE_CONFIG_H__
 
 #include "ConfigProperty.hpp"
-#include "../file/KvFileReader.h"
+// #include "../file/KvFileReader.h"
 
 namespace SeaDrip
 {
+    class KvFileReader;
+
     class InvalidShellOption
     {
     public:
