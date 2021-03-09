@@ -1,22 +1,23 @@
-allinone:
-	@echo "usage:"
-	@echo "make sdconfig"
-	@echo "make sdfile"
-	@echo "make sdshell"
+libseadrip: lib/libseadrip_config.a lib/libseadrip_shell.a lib/libseadrip_file.a lib/libseadrip_component.a
+	g++ lib/libseadrip_config.a lib/libseadrip_shell.a lib/libseadrip_file.a lib/libseadrip_component.a -shared -o lib/libseadrip.so
 
 # ============================== package ==============================================================
 
-sdconfig: build/config/common-config.o build/config/socket-config.o build/config/daemon-config.o build/config/debug-config.o
-	ar rcs lib/libseadrip_config.a build/config/common-config.o build/config/socket-config.o build/config/daemon-config.o build/config/debug-config.o
-	g++ build/config/common-config.o build/config/socket-config.o build/config/daemon-config.o build/config/debug-config.o -shared -o lib/libseadrip_config.so
+lib/libseadrip_config.a: build/config/common-config.o build/config/socket-config.o build/config/daemon-config.o build/config/debug-config.o build/config/epoll-config.o
+	ar rcs lib/libseadrip_config.a build/config/common-config.o build/config/socket-config.o build/config/daemon-config.o build/config/debug-config.o build/config/epoll-config.o
+	g++ build/config/common-config.o build/config/socket-config.o build/config/daemon-config.o build/config/debug-config.o build/config/epoll-config.o -shared -o lib/libseadrip_config.so
 
-sdfile: build/file/pathlock build/file/ini-file-reader.o
+lib/libseadrip_file.a: build/file/pathlock build/file/ini-file-reader.o
 	ar rcs lib/libseadrip_file.a build/file/ini-file-reader.o
 	g++ build/file/ini-file-reader.o -shared -o lib/libseadrip_file.so
 
-sdshell: build/shell/pathlock build/shell/shell-input.o
+lib/libseadrip_shell.a: build/shell/pathlock build/shell/shell-input.o
 	ar rcs lib/libseadrip_shell.a build/shell/shell-input.o
 	g++ build/shell/shell-input.o -shared -o lib/libseadrip_shell.so
+
+lib/libseadrip_component.a: build/component/pathlock build/component/socket-component.o
+	ar rcs lib/libseadrip_component.a build/component/socket-component.o
+	g++ build/component/socket-component.o -o lib/libseadrip_component.so
 
 # ============================== atom =================================================================
 
@@ -36,6 +37,9 @@ build/config/daemon-config.o: src/config/DaemonConfig.cpp src/seadrip/config/ato
 
 build/config/socket-config.o: src/config/SocketConfig.cpp src/seadrip/config/atom/SocketConfig.h
 	g++ -c -std=c++11 src/config/SocketConfig.cpp -o build/config/socket-config.o -fPIC
+
+build/config/epoll-config.o: src/config/EpollConfig.cpp src/seadrip/config/atom/EpollConfig.h
+	g++ -c -std=c++11 src/config/EpollConfig.cpp -o build/config/epoll-config.o -fPIC
 
 # ============================== atom - file ===========================================================
 
@@ -59,6 +63,14 @@ build/shell/shell-input.o: src/ShellInput.cpp src/seadrip/shell/ShellInput.h
 
 build/shell/daemon-util.o: src/DaemonUtil.cpp src/seadrip/shell/Daemon.h
 	g++ -c -std=c++11 src/DaemonUtil.cpp -o build/shell/daemon-util.o
+
+# ============================== atom - component =======================================================
+build/component/pathlock:
+	mkdir -p build/component
+	touch build/component/pathlock
+
+build/component/socket-component.o: src/component/SocketComponent.cpp src/seadrip/component/SocketComponent.h
+	g++ -c -std=c++11 src/component/SocketComponent.cpp -o build/component/socket-component.o -fPIC
 
 #build/daemon-log.o: src/DaemonLog.cpp src/seadrip/DaemonLog.h
 #	g++ -c -std=c++11 src/DaemonLog.cpp -o build/daemon-log.o
