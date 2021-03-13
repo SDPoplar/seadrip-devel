@@ -1,5 +1,5 @@
 #include "../seadrip/config/atom/DaemonConfig.h"
-#include "seadrip/LinuxSigMap.h"
+#include "../seadrip/LinuxSigMap.h"
 #include <boost/algorithm/string.hpp>
 using namespace SeaDrip;
 
