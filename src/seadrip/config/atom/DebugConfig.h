@@ -9,6 +9,8 @@ namespace SeaDrip
     {
     public:
         DebugConfig( const bool isDebug = false );
+        DebugConfig( const DebugConfig& copy ) = default;
+        virtual ~DebugConfig() = default;
         const bool IsDebug( void ) const noexcept;
         DebugConfig& SetDebug( const bool flag = true, const EConfigSetFrom from = EConfigSetFrom::RUNTIME );
     protected:

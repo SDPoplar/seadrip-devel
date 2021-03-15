@@ -9,6 +9,8 @@ namespace SeaDrip
     {
     public:
         EpollConfig( int def_max_event );
+        EpollConfig( const EpollConfig& copy ) = default;
+        virtual ~EpollConfig() = default;
 
         const int GetMaxEvent() const noexcept;
         EpollConfig &SetMaxEvent( const int max_event_num, const EConfigSetFrom from = EConfigSetFrom::RUNTIME );

@@ -9,6 +9,7 @@ namespace SeaDrip
     {
     public:
         SocketComponent();
+        virtual ~SocketComponent() = default;
 
         const int GetSocket() const noexcept;
 

@@ -9,6 +9,8 @@ namespace SeaDrip
     {
     public:
         DaemonConfig( const std::string& def_pid_path );
+        DaemonConfig( const DaemonConfig& copy ) = default;
+        virtual ~DaemonConfig() = default;
         const std::string GetPidPath( void ) const noexcept;
         DaemonConfig& SetPidPath( const std::string& pid_path, EConfigSetFrom from = EConfigSetFrom::RUNTIME );
         const int GetExitSig( void ) const noexcept;

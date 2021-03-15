@@ -9,6 +9,8 @@ namespace SeaDrip
     {
     public:
         SocketConfig( int port, std::string addr = "" );
+        SocketConfig( const SocketConfig& copy ) = default;
+        virtual ~SocketConfig() = default;
 
         const std::string GetListenAddr( void ) const noexcept;
         SocketConfig &SetListenAddr( const std::string& addr, const EConfigSetFrom from = EConfigSetFrom::RUNTIME );

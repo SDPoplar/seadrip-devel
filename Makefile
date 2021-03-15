@@ -1,11 +1,12 @@
 libseadrip: lib/libseadrip_config.a lib/libseadrip_shell.a lib/libseadrip_file.a lib/libseadrip_component.a
-	g++ lib/libseadrip_config.a lib/libseadrip_shell.a lib/libseadrip_file.a lib/libseadrip_component.a -shared -o lib/libseadrip.so
+	ar rcs lib/libseadrip.a build/config/common-config.o build/config/socket-config.o build/config/daemon-config.o build/config/debug-config.o build/config/epoll-config.o build/file/ini-file-reader.o build/shell/shell-input.o build/component/socket-component.o build/component/epoll-component.o build/component/inet-socket-component.o
+	g++ -std=c++11 -fPIC -shared -o lib/libseadrip.so lib/libseadrip_config.a lib/libseadrip_shell.a lib/libseadrip_file.a lib/libseadrip_component.a
 
 # ============================== package ==============================================================
 
 lib/libseadrip_config.a: build/config/common-config.o build/config/socket-config.o build/config/daemon-config.o build/config/debug-config.o build/config/epoll-config.o
 	ar rcs lib/libseadrip_config.a build/config/common-config.o build/config/socket-config.o build/config/daemon-config.o build/config/debug-config.o build/config/epoll-config.o
-	g++ build/config/common-config.o build/config/socket-config.o build/config/daemon-config.o build/config/debug-config.o build/config/epoll-config.o -shared -o lib/libseadrip_config.so
+	g++ -fPIC -shared -o lib/libseadrip_config.so build/config/common-config.o build/config/socket-config.o build/config/daemon-config.o build/config/debug-config.o build/config/epoll-config.o
 
 lib/libseadrip_file.a: build/file/pathlock build/file/ini-file-reader.o
 	ar rcs lib/libseadrip_file.a build/file/ini-file-reader.o
@@ -107,6 +108,5 @@ clean:
 install:
 	cp -rf src/seadrip include/
 	cp -rf include/* /usr/include/
-	cp -rf lib/*.a /usr/lib/seadrip/
-	cp -rf lib/*.so /usr/lib/seadrip/
-	echo "/usr/lib/seadrip" > /etc/ld.so.conf.d/seadrip.conf
+	cp -f lib/libseadrip.so /usr/lib/libseadrip.so
+
