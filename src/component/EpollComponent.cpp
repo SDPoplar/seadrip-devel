@@ -1,5 +1,6 @@
 #include "../seadrip/component/EpollComponent.h"
 #include <unistd.h>
+#include <errno.h>
 using namespace SeaDrip;
 
 EpollComponent::EpollComponent() : m_n_poll_fd( 0 ), m_p_events( nullptr ), m_n_event_num( 0 )
@@ -27,6 +28,11 @@ EpollComponent::~EpollComponent()
     }
 
     //if( is_open( this->m_n_poll_fd ) ) { close(this->m_n_poll_fd); }
+    if( this->m_n_poll_fd > 0 )
+    {
+        close( this->m_n_poll_fd );
+        this->m_n_poll_fd = 0;
+    }
 }
 
 EpollComponent& EpollComponent::SetEpollFd( int fd )
@@ -43,10 +49,11 @@ const int EpollComponent::GetPollFd() const noexcept
 bool EpollComponent::Create( int nMaxEvents, void(*InitEventProc)(epoll_event*, void*), void* res )
 {
     int fd = epoll_create( nMaxEvents );
-    if( fd == -1 )
+    if( !this->checkBoolReturn( fd ) )
     {
         return false;
     }
+    this->m_n_poll_fd = fd;
     this->m_n_event_num = nMaxEvents;
     this->m_p_events = new epoll_event[ nMaxEvents ];
     for( int i=0; i<nMaxEvents; i++ )
@@ -58,7 +65,7 @@ bool EpollComponent::Create( int nMaxEvents, void(*InitEventProc)(epoll_event*, 
 
 bool EpollComponent::BindEvent( const int fd )
 {
-    return epoll_ctl( this->m_n_poll_fd, EPOLL_CTL_ADD, fd, this->m_p_events ) != -1;
+    return this->checkBoolReturn( epoll_ctl( this->m_n_poll_fd, EPOLL_CTL_ADD, fd, this->m_p_events ) );
 }
 
 std::vector<epoll_event*> EpollComponent::Listen( const int timeout, const bool bBlock )
@@ -70,4 +77,20 @@ std::vector<epoll_event*> EpollComponent::Listen( const int timeout, const bool 
         ret.push_back( this->m_p_events + i );
     }
     return ret;
+}
+
+const int EpollComponent::GetLastError() const noexcept
+{
+    return this->m_n_last_error;
+}
+
+// ========================= protected methods ========================================
+const bool EpollComponent::checkBoolReturn( const int ret_val, const int err )
+{
+    if( ret_val != err )
+    {
+        return true;
+    }
+    this->m_n_last_error = errno;
+    return false;
 }

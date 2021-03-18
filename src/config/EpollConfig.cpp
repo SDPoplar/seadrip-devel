@@ -16,3 +16,14 @@ EpollConfig &EpollConfig::SetMaxEvent( const int maxEventNum, const EConfigSetFr
     this->m_n_epoll_max_event.Set( from, maxEventNum );
     return *this;
 }
+
+const int EpollConfig::GetTimeout() const noexcept
+{
+    return this->m_n_epoll_timeout.Get();
+}
+
+EpollConfig &EpollConfig::SetTimeout( const int timeout, const EConfigSetFrom from )
+{
+    this->m_n_epoll_timeout.Set( from, timeout );
+    return *this;
+}

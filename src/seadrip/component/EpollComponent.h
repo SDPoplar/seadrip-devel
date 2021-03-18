@@ -15,17 +15,21 @@ namespace SeaDrip
 
         bool Create( int nMaxEvents, void(*InitEventProc)(epoll_event*, void*), void* res = nullptr );
         const int GetPollFd() const noexcept;
+        bool BindEvent( const int fd );
         std::vector<epoll_event*> Listen( const int timeout, const bool block = false );
 
-        bool BindEvent( const int fd );
+        const int GetLastError() const noexcept;
 
     protected:
         EpollComponent& SetEpollFd( int fd );
+        const bool checkBoolReturn( const int ret_val, const int err_value = -1 );
 
     private:
         int m_n_poll_fd;
         epoll_event* m_p_events;
         int m_n_event_num;
+
+        int m_n_last_error;
     };
 };
 

@@ -32,6 +32,8 @@ const bool InetSocketComponent::BindAndListen( in_port_t port )
     addr.sin_family = AF_INET;
     addr.sin_addr.s_addr = INADDR_ANY;
     addr.sin_port = port;
-    bind( this->m_n_socket, (const sockaddr*)&addr, sizeof(addr) );
-    return listen( this->m_n_socket, 5 ) != -1;
+    return true
+        && ( bind( this->m_n_socket, (const sockaddr*)&addr, sizeof(addr) ) != -1 )
+        && ( listen( this->m_n_socket, 5 ) != -1 )
+        && true;
 }
