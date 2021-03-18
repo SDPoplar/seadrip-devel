@@ -2,7 +2,8 @@
 
 using namespace SeaDrip;
 
-EpollConfig::EpollConfig( int maxEventNum ) : m_n_epoll_max_event( maxEventNum )
+EpollConfig::EpollConfig( const int maxEventNum, const int timeout )
+    : m_n_epoll_max_event( maxEventNum ), m_n_epoll_timeout( timeout )
 {}
 
 const int EpollConfig::GetMaxEvent() const noexcept
