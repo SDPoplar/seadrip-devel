@@ -1,5 +1,5 @@
 libseadrip: lib/libseadrip_config.a lib/libseadrip_shell.a lib/libseadrip_file.a lib/libseadrip_component.a
-	ar rcs lib/libseadrip.a build/config/common-config.o build/config/socket-config.o build/config/daemon-config.o build/config/debug-config.o build/config/epoll-config.o build/file/ini-file-reader.o build/shell/shell-input.o build/component/socket-component.o build/component/epoll-component.o build/component/inet-socket-component.o
+	ar rcs lib/libseadrip.a build/config/common-config.o build/config/socket-config.o build/config/daemon-config.o build/config/debug-config.o build/config/epoll-config.o build/file/ini-file-reader.o build/shell/shell-input.o build/component/socket-component.o build/component/epoll-component.o build/component/inet-socket-component.o build/component/work-process-component.o
 	g++ -std=c++11 -fPIC -shared -o lib/libseadrip.so lib/libseadrip_config.a lib/libseadrip_shell.a lib/libseadrip_file.a lib/libseadrip_component.a
 
 # ============================== package ==============================================================
@@ -16,9 +16,9 @@ lib/libseadrip_shell.a: build/shell/pathlock build/shell/shell-input.o
 	ar rcs lib/libseadrip_shell.a build/shell/shell-input.o
 	g++ build/shell/shell-input.o -shared -o lib/libseadrip_shell.so
 
-lib/libseadrip_component.a: build/component/pathlock build/component/socket-component.o build/component/inet-socket-component.o build/component/epoll-component.o
-	ar rcs lib/libseadrip_component.a build/component/socket-component.o build/component/epoll-component.o build/component/inet-socket-component.o
-	g++ build/component/socket-component.o build/component/inet-socket-component.o build/component/epoll-component.o -shared -o lib/libseadrip_component.so
+lib/libseadrip_component.a: build/component/pathlock build/component/socket-component.o build/component/inet-socket-component.o build/component/epoll-component.o build/component/work-process-component.o
+	ar rcs lib/libseadrip_component.a build/component/socket-component.o build/component/epoll-component.o build/component/inet-socket-component.o build/component/work-process-component.o
+	g++ -shared -o lib/libseadrip_component.so build/component/socket-component.o build/component/inet-socket-component.o build/component/epoll-component.o build/component/work-process-component.o
 
 # ============================== atom =================================================================
 
@@ -78,6 +78,9 @@ build/component/inet-socket-component.o: src/component/InetSocketComponent.cpp s
 
 build/component/epoll-component.o: src/component/EpollComponent.cpp src/seadrip/component/EpollComponent.h
 	g++ -c -std=c++11 src/component/EpollComponent.cpp -o build/component/epoll-component.o -fPIC
+
+build/component/work-process-component.o: src/component/WorkProcessComponent.cpp src/seadrip/component/WorkProcessComponent.h
+	g++ -c -std=c++11 -fPIC -o build/component/work-process-component.o src/component/WorkProcessComponent.cpp
 
 #build/daemon-log.o: src/DaemonLog.cpp src/seadrip/DaemonLog.h
 #	g++ -c -std=c++11 src/DaemonLog.cpp -o build/daemon-log.o
