@@ -22,6 +22,9 @@ namespace SeaDrip
     enum class WorkProcessOptions : int
     {
         STOP,
+
+        USER_OP_1,
+        USER_OP_2,
     };
 
     class WorkProcessNoticePack
@@ -29,11 +32,35 @@ namespace SeaDrip
     public:
         WorkProcessNoticePack( const int op, const sigval data );
 
+        const int GetOption() const noexcept;
+        const sigval GetData() const noexcept;
         const int GetDataAsInt() const noexcept;
         const void* GetDataAsPtr() const noexcept;
     protected:
-        int op;
-        sigval data;
+        int m_n_op;
+        sigval m_union_data;
+    };
+
+    typedef void(*WorkProcessClientEventProc)(class WorkProcessClient*, sigval);
+    class WorkProcessClient
+    {
+    public:
+        WorkProcessClient( const int parentPid );
+
+        const bool Init( void(*handler)(int, siginfo_t*, void*), const std::map<int, WorkProcessClientEventProc> *workmap );
+        const bool Ready();
+        const bool ClientRunning() const noexcept;
+        void Work( WorkProcessNoticePack* event );
+        void Stop();
+
+    protected:
+        const int GetParentPid() const noexcept;
+        const bool ReportEvent( const int op, const sigval data );
+
+    private:
+        int m_n_parent_pid;
+        int m_b_client_running;
+        const std::map<int, WorkProcessClientEventProc>* m_p_method_dict;
     };
 
     class WorkProcessComponent

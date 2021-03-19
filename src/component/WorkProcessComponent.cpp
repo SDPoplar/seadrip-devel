@@ -4,6 +4,90 @@
 #include <string>
 using namespace SeaDrip;
 
+// ============================ WorkProcessNoticePack =======================================
+
+WorkProcessNoticePack::WorkProcessNoticePack( const int op, const sigval data )
+    : m_n_op( op ), m_union_data( data )
+{}
+
+const int WorkProcessNoticePack::GetOption() const noexcept
+{
+    return this->m_n_op;
+}
+
+const sigval WorkProcessNoticePack::GetData() const noexcept
+{
+    return this->m_union_data;
+}
+
+const int WorkProcessNoticePack::GetDataAsInt() const noexcept
+{
+    return this->m_union_data.sival_int;
+}
+const void* WorkProcessNoticePack::GetDataAsPtr() const noexcept
+{
+    return this->m_union_data.sival_ptr;
+}
+
+// ============================= WorkProcessClient ===========================================
+
+WorkProcessClient::WorkProcessClient( const int parentPid ) : m_n_parent_pid( parentPid ), m_b_client_running( false )
+{}
+
+const int WorkProcessClient::GetParentPid() const noexcept
+{
+    return this->m_n_parent_pid;
+}
+
+const bool WorkProcessClient::ClientRunning() const noexcept
+{
+    return this->m_b_client_running;
+}
+
+const bool WorkProcessClient::Init( void(*handler)(int, siginfo_t*, void*), const std::map<int, WorkProcessClientEventProc> *workmap )
+{
+    struct sigaction action;
+    action.sa_sigaction = handler;
+    action.sa_flags = SA_SIGINFO;
+    if( sigaction( SIGUSR1, &action, nullptr ) == -1 )
+    {
+        return false;
+    }
+    this->m_b_client_running = true;
+    this->m_p_method_dict = workmap;
+    return this->Ready();
+}
+
+void WorkProcessClient::Stop()
+{
+    this->m_b_client_running = false;
+}
+
+void WorkProcessClient::Work( WorkProcessNoticePack* event )
+{
+    auto method = this->m_p_method_dict->find( event->GetOption() );
+    if( method != this->m_p_method_dict->end() )
+    {
+        auto func = method->second;
+        func( this, event->GetData() );
+    }
+    delete event;
+}
+
+const bool WorkProcessClient::Ready()
+{
+    return this->ReportEvent( static_cast<int>(WorkProcessEvents::READY), {0} );
+}
+
+const bool WorkProcessClient::ReportEvent( const int op, const sigval data )
+{
+    sigval sigdata;
+    sigdata.sival_ptr = new WorkProcessNoticePack( op, data );
+    return sigqueue( this->GetParentPid(), SIGUSR1, sigdata );
+}
+
+// ============================= WorkProcessComponent ========================================
+
 WorkProcessComponent::~WorkProcessComponent()
 {
     for( auto item : this->m_map_worker )
