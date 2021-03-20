@@ -29,6 +29,17 @@ const void* WorkProcessNoticePack::GetDataAsPtr() const noexcept
     return this->m_union_data.sival_ptr;
 }
 
+WorkProcessEventPack::WorkProcessEventPack( const int event, sigval data )
+    : WorkProcessNoticePack( event, data )
+{
+    this->m_n_pid = getpid();
+}
+
+const int WorkProcessEventPack::FromProcess() const noexcept
+{
+    return this->m_n_pid;
+}
+
 // ============================= WorkProcessClient ===========================================
 
 WorkProcessClient::WorkProcessClient( const int parentPid ) : m_n_parent_pid( parentPid ), m_b_client_running( false )
@@ -55,7 +66,7 @@ const bool WorkProcessClient::Init( void(*handler)(int, siginfo_t*, void*), cons
     }
     this->m_b_client_running = true;
     this->m_p_method_dict = workmap;
-    return this->Ready();
+    return this->ReportReady();
 }
 
 void WorkProcessClient::Stop()
@@ -74,15 +85,22 @@ void WorkProcessClient::Work( WorkProcessNoticePack* event )
     delete event;
 }
 
-const bool WorkProcessClient::Ready()
+const bool WorkProcessClient::ReportReady()
 {
     return this->ReportEvent( static_cast<int>(WorkProcessEvents::READY), {0} );
+}
+
+const bool WorkProcessClient::ReportError( const char* message )
+{
+    sigval msg;
+    msg.sival_ptr = ( void* )message;
+    return this->ReportEvent( static_cast<int>( WorkProcessEvents::ERROR ), msg );
 }
 
 const bool WorkProcessClient::ReportEvent( const int op, const sigval data )
 {
     sigval sigdata;
-    sigdata.sival_ptr = new WorkProcessNoticePack( op, data );
+    sigdata.sival_ptr = new WorkProcessEventPack( op, data );
     return sigqueue( this->GetParentPid(), SIGUSR1, sigdata );
 }
 
@@ -108,8 +126,26 @@ std::string makePath( const char* path )
     return ret + path;
 }
 
+WorkProcessComponent* forked = nullptr;
+
+void WorkProcessEventHandler(int, siginfo_t* info, void* data )
+{
+    if( forked )
+    {
+        forked->OnEvent( (WorkProcessEventPack*)data );
+    }
+}
+
 bool WorkProcessComponent::Fork( const char* worker, const char* withUser, const int workerNum )
 {
+    forked = this;
+    struct sigaction sighandler;
+    sighandler.sa_sigaction = WorkProcessEventHandler;
+    sighandler.sa_flags = SA_SIGINFO;
+    if( sigaction( SIGUSR1, &sighandler, nullptr ) == -1 )
+    {
+        return false;
+    }
     auto path = makePath( worker );
     char pidstr[ 32 ] = "";
     sprintf( pidstr, "%d", getpid() );
@@ -152,4 +188,31 @@ bool WorkProcessComponent::NoticeWorker( const int workerPid, const int op, cons
     sigval d;
     d.sival_ptr = new WorkProcessNoticePack( op, data );
     return sigqueue( workerPid, SIGUSR1, d ) != -1;
+}
+
+void WorkProcessComponent::OnEvent( WorkProcessEventPack* event )
+{
+    switch (event->GetOption())
+    {
+    case static_cast<int>(WorkProcessEvents::READY):
+        this->OnWorkProcessReady(event->FromProcess());
+        break;
+    case static_cast<int>(WorkProcessEvents::ERROR):
+        // save log or fix it
+        break;
+    default:
+        break;
+    }
+    delete event;
+}
+
+void WorkProcessComponent::OnWorkProcessReady( const int processPid )
+{
+    auto found = this->m_map_worker.find(processPid);
+    if( found != this->m_map_worker.end() )
+    {
+        found->second = WorkProcessStatus::READY;
+        this->m_queue_free.push_back(processPid);
+    }
+ 
 }

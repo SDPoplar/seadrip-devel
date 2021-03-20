@@ -1,12 +1,22 @@
+CC = g++ --std=c++11
+
+SRCPATH = src
+SRC_CFG = $(SRCPATH)/config
+SRC_SHELL = $(SRCPATH)/shell
+
+OBJPATH = build
+OBJ_CFG = $(OBJPATH)/config
+OBJ_SHELL = $(OBJPATH)/shell
+
 libseadrip: lib/libseadrip_config.a lib/libseadrip_shell.a lib/libseadrip_file.a lib/libseadrip_component.a
-	ar rcs lib/libseadrip.a build/config/common-config.o build/config/socket-config.o build/config/daemon-config.o build/config/debug-config.o build/config/epoll-config.o build/file/ini-file-reader.o build/shell/shell-input.o build/component/socket-component.o build/component/epoll-component.o build/component/inet-socket-component.o build/component/work-process-component.o
+	ar rcs lib/libseadrip.a $(OBJ_CFG)/common-config.o $(OBJ_CFG)/socket-config.o $(OBJ_CFG)/daemon-config.o $(OBJ_CFG)/debug-config.o $(OBJ_CFG)/epoll-config.o $(OBJ_CFG)/work-process-config.o build/file/ini-file-reader.o build/shell/shell-input.o build/component/socket-component.o build/component/epoll-component.o build/component/inet-socket-component.o build/component/work-process-component.o
 	g++ -std=c++11 -fPIC -shared -o lib/libseadrip.so lib/libseadrip_config.a lib/libseadrip_shell.a lib/libseadrip_file.a lib/libseadrip_component.a
 
 # ============================== package ==============================================================
 
-lib/libseadrip_config.a: build/config/common-config.o build/config/socket-config.o build/config/daemon-config.o build/config/debug-config.o build/config/epoll-config.o
-	ar rcs lib/libseadrip_config.a build/config/common-config.o build/config/socket-config.o build/config/daemon-config.o build/config/debug-config.o build/config/epoll-config.o
-	g++ -fPIC -shared -o lib/libseadrip_config.so build/config/common-config.o build/config/socket-config.o build/config/daemon-config.o build/config/debug-config.o build/config/epoll-config.o
+lib/libseadrip_config.a: $(OBJ_CFG)/common-config.o $(OBJ_CFG)/socket-config.o $(OBJ_CFG)/daemon-config.o $(OBJ_CFG)/debug-config.o $(OBJ_CFG)/epoll-config.o $(OBJ_CFG)/work-process-config.o
+	ar rcs lib/libseadrip_config.a $(OBJ_CFG)/common-config.o $(OBJ_CFG)/socket-config.o $(OBJ_CFG)/daemon-config.o $(OBJ_CFG)/debug-config.o $(OBJ_CFG)/epoll-config.o $(OBJ_CFG)/work-process-config.o
+	$(CC) -fPIC -shared -o lib/libseadrip_config.so $(OBJ_CFG)/common-config.o $(OBJ_CFG)/socket-config.o $(OBJ_CFG)/daemon-config.o $(OBJ_CFG)/debug-config.o $(OBJ_CFG)/epoll-config.o $(OBJ_CFG)/work-process-config.o
 
 lib/libseadrip_file.a: build/file/pathlock build/file/ini-file-reader.o
 	ar rcs lib/libseadrip_file.a build/file/ini-file-reader.o
@@ -23,24 +33,27 @@ lib/libseadrip_component.a: build/component/pathlock build/component/socket-comp
 # ============================== atom =================================================================
 
 # ============================== atom - config ========================================================
-build/config/common-config.o: build/config/pathlock src/config/CommonConfig.cpp src/seadrip/config/base/BaseConfig.h src/seadrip/config/base/ConfigProperty.hpp
-	g++ -c -std=c++11 src/config/CommonConfig.cpp -o build/config/common-config.o -fPIC
+$(OBJ_CFG)/pathlock:
+	mkdir -p $(OBJ_CFG)
+	touch $(OBJ_CFG)/pathlock
 
-build/config/pathlock:
-	mkdir -p build/config
-	touch build/config/pathlock
+$(OBJ_CFG)/common-config.o: $(OBJ_CFG)/pathlock $(SRC_CFG)/CommonConfig.cpp src/seadrip/config/base/BaseConfig.h src/seadrip/config/base/ConfigProperty.hpp
+	$(CC) -c -o $(OBJ_CFG)/common-config.o $(SRC_CFG)/CommonConfig.cpp -fPIC
 
-build/config/debug-config.o: src/config/DebugConfig.cpp src/seadrip/config/atom/DebugConfig.h
-	g++ -c -std=c++11 src/config/DebugConfig.cpp -o build/config/debug-config.o -fPIC
+$(OBJ_CFG)/debug-config.o: $(SRC_CFG)/DebugConfig.cpp src/seadrip/config/atom/DebugConfig.h
+	$(CC) -c -o $(OBJ_CFG)/debug-config.o $(SRC_CFG)/DebugConfig.cpp -fPIC
 
-build/config/daemon-config.o: src/config/DaemonConfig.cpp src/seadrip/config/atom/DaemonConfig.h
-	g++ -c -std=c++11 src/config/DaemonConfig.cpp -o build/config/daemon-config.o -fPIC
+$(OBJ_CFG)/daemon-config.o: $(SRC_CFG)/DaemonConfig.cpp src/seadrip/config/atom/DaemonConfig.h
+	$(CC) -c -o $(OBJ_CFG)/daemon-config.o $(SRC_CFG)/DaemonConfig.cpp -fPIC
 
-build/config/socket-config.o: src/config/SocketConfig.cpp src/seadrip/config/atom/SocketConfig.h
-	g++ -c -std=c++11 src/config/SocketConfig.cpp -o build/config/socket-config.o -fPIC
+$(OBJ_CFG)/socket-config.o: src/config/SocketConfig.cpp src/seadrip/config/atom/SocketConfig.h
+	$(CC) -c -o $(OBJ_CFG)/socket-config.o src/config/SocketConfig.cpp -fPIC
 
-build/config/epoll-config.o: src/config/EpollConfig.cpp src/seadrip/config/atom/EpollConfig.h
-	g++ -c -std=c++11 src/config/EpollConfig.cpp -o build/config/epoll-config.o -fPIC
+$(OBJ_CFG)/epoll-config.o: src/config/EpollConfig.cpp src/seadrip/config/atom/EpollConfig.h
+	g++ -c -std=c++11 src/config/EpollConfig.cpp -o $(OBJ_CFG)/epoll-config.o -fPIC
+
+$(OBJ_CFG)/work-process-config.o: $(SRC_CFG)/WorkProcessConfig.cpp src/seadrip/config/atom/WorkProcessConfig.h
+	$(CC) -c -o $(OBJ_CFG)/work-process-config.o $(SRC_CFG)/WorkProcessConfig.cpp -fPIC
 
 # ============================== atom - file ===========================================================
 

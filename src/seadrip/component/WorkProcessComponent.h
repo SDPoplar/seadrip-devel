@@ -12,11 +12,13 @@ namespace SeaDrip
         CREATE,
         READY,
         ZOMBIE,
+        ERROR,
     };
 
     enum class WorkProcessEvents : int
     {
         READY,
+        ERROR,
     };
 
     enum class WorkProcessOptions : int
@@ -41,6 +43,16 @@ namespace SeaDrip
         sigval m_union_data;
     };
 
+    class WorkProcessEventPack : public WorkProcessNoticePack
+    {
+    public:
+        WorkProcessEventPack( const int event, const sigval data );
+        const int FromProcess() const noexcept;
+
+    protected:
+        int m_n_pid;
+    };
+
     typedef void(*WorkProcessClientEventProc)(class WorkProcessClient*, sigval);
     class WorkProcessClient
     {
@@ -48,7 +60,8 @@ namespace SeaDrip
         WorkProcessClient( const int parentPid );
 
         const bool Init( void(*handler)(int, siginfo_t*, void*), const std::map<int, WorkProcessClientEventProc> *workmap );
-        const bool Ready();
+        const bool ReportReady();
+        const bool ReportError( const char* message );
         const bool ClientRunning() const noexcept;
         void Work( WorkProcessNoticePack* event );
         void Stop();
@@ -71,6 +84,8 @@ namespace SeaDrip
         bool Fork( const char* worker, const char* withUser, const int workerNum );
         int PopFreeWorker();
         bool NoticeFreeWorker( const int op, const sigval data );
+        void OnEvent( WorkProcessEventPack* event );
+        void OnWorkProcessReady( const int processPid );
 
     protected:
         bool NoticeWorker( const int workerPid, const int op, const sigval data );

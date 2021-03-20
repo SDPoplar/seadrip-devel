@@ -6,5 +6,6 @@
 #include "./config/atom/DaemonConfig.h"
 #include "./config/atom/SocketConfig.h"
 #include "./config/atom/EpollConfig.h"
+#include "./config/atom/WorkProcessConfig.h"
 
 #endif
