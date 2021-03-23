@@ -76,9 +76,13 @@ namespace SeaDrip
         const std::map<int, WorkProcessClientEventProc>* m_p_method_dict;
     };
 
+    typedef void(*WorkProcessReadyProc)(const int);
+    typedef void(*WorkProcessExceptionExitProc)(const int, const int);
+
     class WorkProcessComponent
     {
     public:
+        WorkProcessComponent();
         ~WorkProcessComponent();
 
         bool Fork( const char* worker, const char* withUser, const int workerNum );
@@ -86,13 +90,19 @@ namespace SeaDrip
         bool NoticeFreeWorker( const int op, const sigval data );
         void OnEvent( WorkProcessEventPack* event );
         void OnWorkProcessReady( const int processPid );
-
-    protected:
+        void OnWorkProcessExceptionExit( const int pid, const int exitStatus );
         bool NoticeWorker( const int workerPid, const int op, const sigval data );
+
+        WorkProcessReadyProc SetProcessReadyListener( WorkProcessReadyProc listener );
+        WorkProcessExceptionExitProc SetProcessExceptionExitListenter( WorkProcessExceptionExitProc listener );
 
     private:
         std::map<int, WorkProcessStatus> m_map_worker;
         std::vector<int> m_queue_free;
+
+        // listeners
+        WorkProcessReadyProc m_func_wpready_listener;
+        WorkProcessExceptionExitProc m_func_wpexit_listener;
     };
 };
 

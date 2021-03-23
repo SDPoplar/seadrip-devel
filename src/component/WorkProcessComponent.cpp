@@ -1,7 +1,9 @@
 #include "../seadrip/component/WorkProcessComponent.h"
 #include <signal.h>
+#include <sys/wait.h>
 #include <unistd.h>
 #include <string>
+#include <iostream>
 using namespace SeaDrip;
 
 // ============================ WorkProcessNoticePack =======================================
@@ -106,6 +108,10 @@ const bool WorkProcessClient::ReportEvent( const int op, const sigval data )
 
 // ============================= WorkProcessComponent ========================================
 
+WorkProcessComponent::WorkProcessComponent()
+    : m_func_wpready_listener( nullptr ), m_func_wpexit_listener( nullptr )
+{}
+
 WorkProcessComponent::~WorkProcessComponent()
 {
     for( auto item : this->m_map_worker )
@@ -114,31 +120,30 @@ WorkProcessComponent::~WorkProcessComponent()
     }
 }
 
-std::string makePath( const char* path )
-{
-    if( path[ 0 ] == '/' )
-    {
-        return std::string( path );
-    }
-    char buff[ 256 ];
-    readlink( path, buff, 256 );
-    std::string ret = buff;
-    return ret + path;
-}
-
 WorkProcessComponent* forked = nullptr;
 
-void WorkProcessEventHandler(int, siginfo_t* info, void* data )
+void WorkProcessEventHandler(int sig, siginfo_t* info, void* data )
 {
-    if( forked )
+    if( ( sig == SIGUSR1 ) && forked )
     {
         forked->OnEvent( (WorkProcessEventPack*)data );
+    }
+}
+
+void WorkProcessExceptionExitHandler( int )
+{
+    int status;
+    pid_t pid;
+    while( forked && ( ( pid = waitpid( 0, &status, WNOHANG ) ) > 0 ) )
+    {
+        forked->OnWorkProcessExceptionExit( pid, status );
     }
 }
 
 bool WorkProcessComponent::Fork( const char* worker, const char* withUser, const int workerNum )
 {
     forked = this;
+    signal( SIGCHLD, WorkProcessExceptionExitHandler );
     struct sigaction sighandler;
     sighandler.sa_sigaction = WorkProcessEventHandler;
     sighandler.sa_flags = SA_SIGINFO;
@@ -146,22 +151,20 @@ bool WorkProcessComponent::Fork( const char* worker, const char* withUser, const
     {
         return false;
     }
-    auto path = makePath( worker );
     char pidstr[ 32 ] = "";
     sprintf( pidstr, "%d", getpid() );
     for( int i=0; i<workerNum; i++ )
     {
         int forkedPid = fork();
-        if( forkedPid == -1 )
-        {
-            return false;
-        }
         if( forkedPid > 0 )
         {
             this->m_map_worker[ forkedPid ] = WorkProcessStatus::CREATE;
             continue;
         }
-        execl( path.c_str(), pidstr );
+        if( (forkedPid == -1 ) || ( execl( worker, worker, pidstr ) == -1 ) )
+        {
+            return false;
+        }
     }
     return true;
 }
@@ -196,6 +199,10 @@ void WorkProcessComponent::OnEvent( WorkProcessEventPack* event )
     {
     case static_cast<int>(WorkProcessEvents::READY):
         this->OnWorkProcessReady(event->FromProcess());
+        if( this->m_func_wpready_listener )
+        {
+            this->m_func_wpready_listener(event->FromProcess());
+        }
         break;
     case static_cast<int>(WorkProcessEvents::ERROR):
         // save log or fix it
@@ -215,4 +222,32 @@ void WorkProcessComponent::OnWorkProcessReady( const int processPid )
         this->m_queue_free.push_back(processPid);
     }
  
+}
+
+void WorkProcessComponent::OnWorkProcessExceptionExit( const int pid, const int status )
+{
+    auto wp = this->m_map_worker.find( pid );
+    if( wp != this->m_map_worker.end() )
+    {
+        wp->second = WorkProcessStatus::ERROR;
+    }
+
+    if( this->m_func_wpexit_listener )
+    {
+        this->m_func_wpexit_listener( pid, status );
+    }
+}
+
+WorkProcessReadyProc WorkProcessComponent::SetProcessReadyListener( WorkProcessReadyProc listener )
+{
+    auto ret = this->m_func_wpready_listener;
+    this->m_func_wpready_listener = listener;
+    return ret;
+}
+
+WorkProcessExceptionExitProc WorkProcessComponent::SetProcessExceptionExitListenter( WorkProcessExceptionExitProc listener )
+{
+    auto ret = this->m_func_wpexit_listener;
+    this->m_func_wpexit_listener = listener;
+    return ret;
 }
