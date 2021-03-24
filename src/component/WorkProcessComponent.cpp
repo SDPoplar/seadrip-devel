@@ -84,7 +84,7 @@ void WorkProcessClient::Work( WorkProcessNoticePack* event )
         auto func = method->second;
         func( this, event->GetData() );
     }
-    delete event;
+    // delete event;
 }
 
 const bool WorkProcessClient::ReportReady()
@@ -210,7 +210,7 @@ void WorkProcessComponent::OnEvent( WorkProcessEventPack* event )
     default:
         break;
     }
-    delete event;
+    // delete event;
 }
 
 void WorkProcessComponent::OnWorkProcessReady( const int processPid )

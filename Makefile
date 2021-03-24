@@ -3,14 +3,18 @@ CC = g++ --std=c++11
 SRCPATH = src
 SRC_CFG = $(SRCPATH)/config
 SRC_SHELL = $(SRCPATH)/shell
+SRC_COMP = $(SRCPATH)/component
+SRC_WP = $(SRCPATH)/work-process
 
 OBJPATH = build
 OBJ_CFG = $(OBJPATH)/config
 OBJ_SHELL = $(OBJPATH)/shell
+OBJ_COMP = $(OBJPATH)/component
+OBJ_WP = $(OBJPATH)/work-process
 
-libseadrip: lib/libseadrip_config.a lib/libseadrip_shell.a lib/libseadrip_file.a lib/libseadrip_component.a
-	ar rcs lib/libseadrip.a $(OBJ_CFG)/common-config.o $(OBJ_CFG)/socket-config.o $(OBJ_CFG)/daemon-config.o $(OBJ_CFG)/debug-config.o $(OBJ_CFG)/epoll-config.o $(OBJ_CFG)/work-process-config.o build/file/ini-file-reader.o build/shell/shell-input.o build/component/socket-component.o build/component/epoll-component.o build/component/inet-socket-component.o build/component/work-process-component.o
-	g++ -std=c++11 -fPIC -shared -o lib/libseadrip.so lib/libseadrip_config.a lib/libseadrip_shell.a lib/libseadrip_file.a lib/libseadrip_component.a
+libseadrip: lib/libseadrip_config.a lib/libseadrip_shell.a lib/libseadrip_file.a lib/libseadrip_component.a lib/libseadrip_workprocess.a
+	ar rcs lib/libseadrip.a $(OBJ_CFG)/common-config.o $(OBJ_CFG)/socket-config.o $(OBJ_CFG)/daemon-config.o $(OBJ_CFG)/debug-config.o $(OBJ_CFG)/epoll-config.o $(OBJ_CFG)/work-process-config.o build/file/ini-file-reader.o build/shell/shell-input.o $(OBJ_COMP)/socket-component.o $(OBJ_COMP)/epoll-component.o $(OBJ_COMP)/inet-socket-component.o $(OBJ_COMP)/work-process-component.o $(OBJ_WP)/type.o $(OBJ_WP)/master.o $(OBJ_WP)/client.o
+	g++ -std=c++11 -fPIC -shared -o lib/libseadrip.so lib/libseadrip_config.a lib/libseadrip_shell.a lib/libseadrip_file.a lib/libseadrip_component.a lib/libseadrip_workprocess.a
 
 # ============================== package ==============================================================
 
@@ -26,9 +30,12 @@ lib/libseadrip_shell.a: build/shell/pathlock build/shell/shell-input.o
 	ar rcs lib/libseadrip_shell.a build/shell/shell-input.o
 	g++ build/shell/shell-input.o -shared -o lib/libseadrip_shell.so
 
-lib/libseadrip_component.a: build/component/pathlock build/component/socket-component.o build/component/inet-socket-component.o build/component/epoll-component.o build/component/work-process-component.o
-	ar rcs lib/libseadrip_component.a build/component/socket-component.o build/component/epoll-component.o build/component/inet-socket-component.o build/component/work-process-component.o
-	g++ -shared -o lib/libseadrip_component.so build/component/socket-component.o build/component/inet-socket-component.o build/component/epoll-component.o build/component/work-process-component.o
+lib/libseadrip_component.a: $(OBJ_COMP)/pathlock $(OBJ_COMP)/socket-component.o $(OBJ_COMP)/inet-socket-component.o $(OBJ_COMP)/epoll-component.o $(OBJ_COMP)/work-process-component.o
+	ar rcs lib/libseadrip_component.a $(OBJ_COMP)/socket-component.o $(OBJ_COMP)/epoll-component.o $(OBJ_COMP)/inet-socket-component.o $(OBJ_COMP)/work-process-component.o
+	g++ -shared -o lib/libseadrip_component.so $(OBJ_COMP)/socket-component.o $(OBJ_COMP)/inet-socket-component.o $(OBJ_COMP)/epoll-component.o $(OBJ_COMP)/work-process-component.o
+
+lib/libseadrip_workprocess.a: $(OBJ_WP)/pathlock $(OBJ_WP)/type.o $(OBJ_WP)/master.o $(OBJ_WP)/client.o
+	ar rcs lib/libseadrip_workprocess.a $(OBJ_WP)/type.o $(OBJ_WP)/master.o $(OBJ_WP)/client.o
 
 # ============================== atom =================================================================
 
@@ -79,41 +86,35 @@ build/shell/daemon-util.o: src/DaemonUtil.cpp src/seadrip/shell/Daemon.h
 	g++ -c -std=c++11 src/DaemonUtil.cpp -o build/shell/daemon-util.o
 
 # ============================== atom - component =======================================================
-build/component/pathlock:
-	mkdir -p build/component
-	touch build/component/pathlock
+$(OBJ_COMP)/pathlock:
+	mkdir -p $(OBJ_COMP)
+	touch $(OBJ_COMP)/pathlock
 
-build/component/socket-component.o: src/component/SocketComponent.cpp src/seadrip/component/SocketComponent.h
-	g++ -c -std=c++11 src/component/SocketComponent.cpp -o build/component/socket-component.o -fPIC
+$(OBJ_COMP)/socket-component.o: $(SRC_COMP)/SocketComponent.cpp src/seadrip/component/SocketComponent.h
+	$(CC) -c -o $(OBJ_COMP)/socket-component.o $(SRC_COMP)/SocketComponent.cpp -fPIC
 
-build/component/inet-socket-component.o: src/component/InetSocketComponent.cpp src/seadrip/component/SocketComponent.h
-	g++ -c -std=c++11 src/component/InetSocketComponent.cpp -o build/component/inet-socket-component.o -fPIC
+$(OBJ_COMP)/inet-socket-component.o: $(SRC_COMP)/InetSocketComponent.cpp src/seadrip/component/SocketComponent.h
+	$(CC) -c -o $(OBJ_COMP)/inet-socket-component.o $(SRC_COMP)/InetSocketComponent.cpp -fPIC
 
-build/component/epoll-component.o: src/component/EpollComponent.cpp src/seadrip/component/EpollComponent.h
-	g++ -c -std=c++11 src/component/EpollComponent.cpp -o build/component/epoll-component.o -fPIC
+$(OBJ_COMP)/epoll-component.o: $(SRC_COMP)/EpollComponent.cpp src/seadrip/component/EpollComponent.h
+	$(CC) -c -o $(OBJ_COMP)/epoll-component.o $(SRC_COMP)/EpollComponent.cpp -fPIC
 
-build/component/work-process-component.o: src/component/WorkProcessComponent.cpp src/seadrip/component/WorkProcessComponent.h
-	g++ -c -std=c++11 -fPIC -o build/component/work-process-component.o src/component/WorkProcessComponent.cpp
+$(OBJ_COMP)/work-process-component.o: $(SRC_COMP)/WorkProcessComponent.cpp src/seadrip/component/WorkProcessComponent.h
+	$(CC) -c -o $(OBJ_COMP)/work-process-component.o $(SRC_COMP)/WorkProcessComponent.cpp -fPIC
 
-#build/daemon-log.o: src/DaemonLog.cpp src/seadrip/DaemonLog.h
-#	g++ -c -std=c++11 src/DaemonLog.cpp -o build/daemon-log.o
+# ============================== work process =============================================================
+$(OBJ_WP)/pathlock:
+	mkdir -p $(OBJ_WP)
+	touch $(OBJ_WP)/pathlock
 
-# build/tick-core.o: src/TickCore.cpp src/seadrip/TickCore.h
-#	g++ -c -std=c++11 src/TickCore.cpp -o build/tick-core.o
+$(OBJ_WP)/type.o: $(SRC_WP)/type.cpp
+	$(CC) -c -o $(OBJ_WP)/type.o $(SRC_WP)/type.cpp -fPIC
 
-#build/singleton-core.o: src/SingletonCore.cpp src/seadrip/SingletonCore.h
-#	g++ -c -std=c++11 src/SingletonCore.cpp -o build/singleton-core.o
+$(OBJ_WP)/master.o: $(SRC_WP)/master.cpp
+	$(CC) -c -o $(OBJ_WP)/master.o $(SRC_WP)/master.cpp -fPIC
 
-#build/daemon-core.o: src/DaemonCore.cpp src/seadrip/DaemonCore.hpp
-#	g++ -c -std=c++11 src/DaemonCore.cpp -o build/daemon-core.o
-
-pre:
-	chmod +x checkpath.sh
-	./checkpath.sh build
-	./checkpath.sh include
-	./checkpath.sh lib
-	./checkpath.sh /usr/lib/seadrip
-	touch build-prepare
+$(OBJ_WP)/client.o: $(SRC_WP)/client.cpp
+	$(CC) -c -o $(OBJ_WP)/client.o $(SRC_WP)/client.cpp -fPIC
 
 clean:
 	rm -f build/*.o
