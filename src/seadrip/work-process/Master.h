@@ -25,10 +25,13 @@ namespace SeaDrip
         {
         public:
             const bool Fork( const char* worker, const char* useAccount, const int workerNum );
+            bool SetClientReady( const int processPid );
+            Worker* PopFreeClient();
         protected:
+            Worker* FindWorkerByPid( const int pid );
         private:
             std::map<int, Worker> m_map_clients;
-            std::vector<int> m_queue_free;
+            std::vector<Worker*> m_queue_free;
         };
     }
 }

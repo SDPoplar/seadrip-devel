@@ -15,11 +15,33 @@ namespace SeaDrip
 
         // task is from master to client
         class Task
-        {};
+        {
+        public:
+            const static int OPTION_QUIT = 1;
+            const static Task QuitTask;
+
+            Task( const int option );
+            const int GetOption() const noexcept;
+
+        private:
+            int m_n_option;
+        };
 
         // event is from client to master
         class Event
-        {};
+        {
+        public:
+            const static int EVENT_ERROR = 1;
+            const static Event ErrorEvent;
+
+            Event( const int event );
+            const int GetClient() const noexcept;
+            const int GetEvent() const noexcept;
+        
+        private:
+            int m_n_event;
+            int m_n_client_pid;
+        };
 
         class SockPair
         {

@@ -50,3 +50,33 @@ const bool Master::Fork( const char* worker, const char* useAccount, const int w
     }
     return true;
 }
+
+bool Master::SetClientReady( const int clientPid )
+{
+    auto worker = this->FindWorkerByPid( clientPid );
+    if( !worker )
+    {
+        return false;
+    }
+
+    *worker = ClientStatus::READY;
+    this->m_queue_free.push_back( worker );
+    return true;
+}
+
+Worker* Master::PopFreeClient()
+{
+    if( this->m_queue_free.empty() )
+    {
+        return nullptr;
+    }
+    auto ret = this->m_queue_free.at( 0 );
+    this->m_queue_free.erase( this->m_queue_free.begin() );
+    return ret;
+}
+
+Worker* Master::FindWorkerByPid( const int pid )
+{
+    auto worker = this->m_map_clients.find( pid );
+    return ( worker == this->m_map_clients.end() ) ? nullptr : &(worker->second);
+}
